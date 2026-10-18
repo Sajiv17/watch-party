@@ -15,6 +15,13 @@ function VideoPlayer({ room, sendPlay, sendPause, sendSeek }) {
   const { handleLocalPlay, handleLocalPause, handleLocalSeek, isRemoteUpdate } =
     useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek);
 
+  // Store handlers in refs so event listeners always have latest version
+  const handlersRef = useRef({ handleLocalPlay, handleLocalPause, isRemoteUpdate });
+
+  useEffect(() => {
+    handlersRef.current = { handleLocalPlay, handleLocalPause, isRemoteUpdate };
+  }, [handleLocalPlay, handleLocalPause, isRemoteUpdate]);
+
   /**
    * Load the YouTube IFrame Player API
    * This injects the script and waits for it to be ready
@@ -67,13 +74,23 @@ function VideoPlayer({ room, sendPlay, sendPause, sendSeek }) {
         // Listen to state changes from the player itself
         // These fire when the user clicks play/pause on the YouTube controls
         onStateChange: (event) => {
+          // Use refs to get the latest handlers
+          const { isRemoteUpdate, handleLocalPlay, handleLocalPause } = handlersRef.current;
+
           // Only handle local actions, not remote updates
-          if (isRemoteUpdate()) return;
+          if (isRemoteUpdate()) {
+            console.log('Ignoring state change (remote update)');
+            return;
+          }
+
+          console.log('Player state changed:', event.data);
 
           // YT.PlayerState: PLAYING = 1, PAUSED = 2
           if (event.data === window.YT.PlayerState.PLAYING) {
+            console.log('User clicked play - sending to server');
             handleLocalPlay();
           } else if (event.data === window.YT.PlayerState.PAUSED) {
+            console.log('User clicked pause - sending to server');
             handleLocalPause();
           }
         }

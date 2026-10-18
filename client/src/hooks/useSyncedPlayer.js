@@ -47,6 +47,7 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
 
     // Set the flag to prevent echo loop
     isRemoteUpdateRef.current = true;
+    console.log('Applying remote update:', room.status, 'at', expectedPosition.toFixed(2));
 
     // Apply the state to the player
     if (room.status === 'playing') {
@@ -62,7 +63,8 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
     // Reset the flag after a short delay
     setTimeout(() => {
       isRemoteUpdateRef.current = false;
-    }, 100);
+      console.log('Remote update flag cleared');
+    }, 200); // Increased to 200ms for safer timing
 
   }, [player, room?.status, room?.position, room?.updatedAt, room?.version]);
 
@@ -71,14 +73,23 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
    * These get sent to the server, which broadcasts to everyone
    */
   const handleLocalPlay = () => {
-    if (isRemoteUpdateRef.current) return;
+    if (isRemoteUpdateRef.current) {
+      console.log('Ignoring local play (remote update in progress)');
+      return;
+    }
+    console.log('Sending PLAY to server, version:', currentVersion);
     sendPlay(currentVersion);
   };
 
   const handleLocalPause = () => {
-    if (isRemoteUpdateRef.current || !player) return;
+    if (isRemoteUpdateRef.current) {
+      console.log('Ignoring local pause (remote update in progress)');
+      return;
+    }
+    if (!player) return;
     try {
       const currentTime = player.getCurrentTime();
+      console.log('Sending PAUSE to server at', currentTime.toFixed(2), 'version:', currentVersion);
       sendPause(currentTime, currentVersion);
     } catch (e) {
       console.error('Error getting current time:', e);
