@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: watch-party-server
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: cd server && npm install
+    startCommand: cd server && npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://your-app.vercel.app
+    healthCheckPath: /health
