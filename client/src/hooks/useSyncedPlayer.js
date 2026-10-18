@@ -21,7 +21,15 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
    * This runs whenever the server sends us an update (play/pause/seek)
    */
   useEffect(() => {
-    if (!player || !room) return;
+    if (!player || !room || !room.videoId) return;
+
+    // Check if player has a video loaded
+    try {
+      const duration = player.getDuration();
+      if (!duration || duration === 0) return; // Video not loaded yet
+    } catch (e) {
+      return; // Player not ready
+    }
 
     // Calculate the expected position based on server state
     // If playing: position + (time elapsed since last update)
@@ -68,15 +76,23 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
   };
 
   const handleLocalPause = () => {
-    if (isRemoteUpdateRef.current) return;
-    const currentTime = player.getCurrentTime();
-    sendPause(currentTime, currentVersion);
+    if (isRemoteUpdateRef.current || !player) return;
+    try {
+      const currentTime = player.getCurrentTime();
+      sendPause(currentTime, currentVersion);
+    } catch (e) {
+      console.error('Error getting current time:', e);
+    }
   };
 
   const handleLocalSeek = () => {
-    if (isRemoteUpdateRef.current) return;
-    const currentTime = player.getCurrentTime();
-    sendSeek(currentTime, currentVersion);
+    if (isRemoteUpdateRef.current || !player) return;
+    try {
+      const currentTime = player.getCurrentTime();
+      sendSeek(currentTime, currentVersion);
+    } catch (e) {
+      console.error('Error getting current time:', e);
+    }
   };
 
   return {

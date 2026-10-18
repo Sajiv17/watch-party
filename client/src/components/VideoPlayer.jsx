@@ -44,6 +44,7 @@ function VideoPlayer({ room, sendPlay, sendPause, sendSeek }) {
 
   /**
    * Create the YouTube player instance when API is ready
+   * We create it ONCE, not every time the video changes
    */
   useEffect(() => {
     if (!apiReady || !playerContainerRef.current || playerRef.current) return;
@@ -51,7 +52,7 @@ function VideoPlayer({ room, sendPlay, sendPause, sendSeek }) {
     const newPlayer = new window.YT.Player(playerContainerRef.current, {
       height: '100%',
       width: '100%',
-      videoId: room?.videoId || 'dQw4w9WgXcQ', // Default video (Rick Roll)
+      videoId: '', // Start with no video - we'll load it separately
       playerVars: {
         controls: 1,
         modestbranding: 1,
@@ -61,6 +62,7 @@ function VideoPlayer({ room, sendPlay, sendPause, sendSeek }) {
         onReady: (event) => {
           playerRef.current = event.target;
           setPlayer(event.target);
+          console.log('YouTube player ready');
         },
         // Listen to state changes from the player itself
         // These fire when the user clicks play/pause on the YouTube controls
@@ -84,7 +86,20 @@ function VideoPlayer({ room, sendPlay, sendPause, sendSeek }) {
         playerRef.current = null;
       }
     };
-  }, [apiReady, room?.videoId]);
+  }, [apiReady]); // Only depends on API ready, NOT videoId
+
+  /**
+   * Load new video when videoId changes
+   * This updates the existing player instead of recreating it
+   */
+  useEffect(() => {
+    if (!player || !room?.videoId) return;
+
+    // Load the new video into the existing player
+    // cueVideoById loads but doesn't autoplay
+    player.cueVideoById(room.videoId);
+    console.log('Loading video:', room.videoId);
+  }, [player, room?.videoId]);
 
   /**
    * Handle seek when user drags the progress bar
