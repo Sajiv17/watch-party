@@ -4,6 +4,7 @@ import { EVENTS } from '../utils/constants';
 import { useRoomSocket } from '../hooks/useRoomSocket';
 import { useClockOffset } from '../hooks/useClockOffset';
 import VideoPlayer from './VideoPlayer';
+import MovieBrowser from './MovieBrowser';
 
 // Room page: the main watch party interface
 function Room({ socket }) {
@@ -61,6 +62,22 @@ function Room({ socket }) {
   // Generate shareable invite link
   const inviteLink = `${window.location.origin}/room/${room.code}`;
 
+  // Handle playing trailer from movie browser
+  const handlePlayTrailer = (youtubeVideoId, movie) => {
+    socket.emit(EVENTS.PLAY_FROM_PLAYLIST, {
+      code,
+      videoId: youtubeVideoId,
+      version: room.version
+    });
+  };
+
+  // Handle adding movie to playlist (Phase 5 will implement full playlist)
+  const handleAddToPlaylist = (movie) => {
+    // For now, just play the trailer
+    alert(`"${movie.title}" will be added to playlist in Phase 5`);
+    // TODO: Implement in Phase 5
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 text-white">
       {/* Header */}
@@ -107,17 +124,17 @@ function Room({ socket }) {
                 getServerTime={getServerTime}
               />
 
-              {/* Video URL input (temporary until Phase 4 TMDB integration) */}
+              {/* Video URL input (fallback for custom YouTube URLs) */}
               <div className="mt-4">
                 <label className="block text-sm text-gray-400 mb-2">
-                  Load a YouTube video (paste URL or video ID):
+                  Or paste a YouTube URL directly:
                 </label>
                 <div className="flex gap-2">
                   <input
                     type="text"
                     value={videoUrl}
                     onChange={(e) => setVideoUrl(e.target.value)}
-                    placeholder="e.g., https://youtube.com/watch?v=dQw4w9WgXcQ or dQw4w9WgXcQ"
+                    placeholder="e.g., https://youtube.com/watch?v=dQw4w9WgXcQ"
                     className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                   <button
@@ -141,20 +158,16 @@ function Room({ socket }) {
                     }}
                     className="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded font-medium"
                   >
-                    Load Video
+                    Load
                   </button>
                 </div>
-                {isHost && (
-                  <p className="text-purple-400 text-sm mt-2">
-                    You are the host - you can control playback
-                  </p>
-                )}
               </div>
             </div>
           </div>
 
-          {/* User list */}
-          <div className="lg:col-span-1">
+          {/* Sidebar: User list + Movie Browser */}
+          <div className="lg:col-span-1 space-y-4">
+            {/* User list */}
             <div className="bg-gray-800 rounded-lg p-4">
               <h2 className="text-xl font-bold mb-4">
                 Participants ({room.users.length})
@@ -175,6 +188,12 @@ function Room({ socket }) {
                 ))}
               </div>
             </div>
+
+            {/* Movie Browser */}
+            <MovieBrowser
+              onPlayTrailer={handlePlayTrailer}
+              onAddToPlaylist={handleAddToPlaylist}
+            />
           </div>
         </div>
       </div>
