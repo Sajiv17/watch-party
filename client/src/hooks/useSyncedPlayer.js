@@ -8,6 +8,9 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
   // Flag to prevent echo loops: when we apply a remote update, don't re-broadcast it
   const isRemoteUpdateRef = useRef(false);
 
+  // Track the last version we applied to prevent re-applying the same state
+  const lastAppliedVersionRef = useRef(-1);
+
   // Store the last known version to send with commands
   const [currentVersion, setCurrentVersion] = useState(0);
 
@@ -18,10 +21,16 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
 
   /**
    * Apply server state to the YouTube player
-   * This runs whenever the server sends us an update (play/pause/seek)
+   * This runs ONLY when the version changes (new update from server)
    */
   useEffect(() => {
     if (!player || !room || !room.videoId) return;
+
+    // CRITICAL: Only apply if this is a NEW version we haven't seen
+    if (room.version === lastAppliedVersionRef.current) {
+      console.log('Skipping sync - already applied version', room.version);
+      return;
+    }
 
     // Check if player has a video loaded
     try {
@@ -45,9 +54,12 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
 
     const expectedPosition = getExpectedPosition();
 
+    // Mark this version as applied
+    lastAppliedVersionRef.current = room.version;
+
     // Set the flag to prevent echo loop
     isRemoteUpdateRef.current = true;
-    console.log('Applying remote update:', room.status, 'at', expectedPosition.toFixed(2));
+    console.log('Applying NEW remote update version', room.version, ':', room.status, 'at', expectedPosition.toFixed(2));
 
     // Apply the state to the player
     if (room.status === 'playing') {
@@ -64,9 +76,9 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
     setTimeout(() => {
       isRemoteUpdateRef.current = false;
       console.log('Remote update flag cleared');
-    }, 200); // Increased to 200ms for safer timing
+    }, 200);
 
-  }, [player, room?.status, room?.position, room?.updatedAt, room?.version]);
+  }, [player, room?.version]); // Only depend on version changes!
 
   /**
    * Handle local play/pause/seek actions from THIS user
