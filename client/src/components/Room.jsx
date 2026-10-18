@@ -146,16 +146,22 @@ function Room({ socket }) {
       {/* Main content */}
       <div className="max-w-7xl mx-auto p-4">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-          {/* Video player */}
-          <div className="lg:col-span-3">
+          {/* Left column: Video + Reactions + Chat + Playlist */}
+          <div className="lg:col-span-3 space-y-4">
+            {/* Video player with reactions */}
             <div className="bg-gray-800 rounded-lg p-4">
-              <VideoPlayer
-                room={room}
-                sendPlay={sendPlay}
-                sendPause={sendPause}
-                sendSeek={sendSeek}
-                getServerTime={getServerTime}
-              />
+              <div className="relative">
+                <VideoPlayer
+                  room={room}
+                  sendPlay={sendPlay}
+                  sendPause={sendPause}
+                  sendSeek={sendSeek}
+                  getServerTime={getServerTime}
+                />
+              </div>
+
+              {/* Reactions component (buttons + floating overlay) */}
+              <Reactions socket={socket} roomCode={code} />
 
               {/* Video URL input (fallback for custom YouTube URLs) */}
               <div className="mt-4">
@@ -168,7 +174,7 @@ function Room({ socket }) {
                     value={videoUrl}
                     onChange={(e) => setVideoUrl(e.target.value)}
                     placeholder="e.g., https://youtube.com/watch?v=dQw4w9WgXcQ"
-                    className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
                   />
                   <button
                     onClick={() => {
@@ -189,18 +195,33 @@ function Room({ socket }) {
                         setVideoUrl('');
                       }
                     }}
-                    className="bg-purple-600 hover:bg-purple-700 px-6 py-2 rounded font-medium"
+                    className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded text-sm font-medium"
                   >
                     Load
                   </button>
                 </div>
               </div>
             </div>
+
+            {/* Chat */}
+            <Chat
+              socket={socket}
+              roomCode={code}
+              messages={room.chat || []}
+            />
+
+            {/* Playlist */}
+            <Playlist
+              socket={socket}
+              roomCode={code}
+              playlist={room.playlist || []}
+              currentVideoId={room.videoId}
+            />
           </div>
 
-          {/* Sidebar: User list + Movie Browser */}
+          {/* Right sidebar: Participants + Polls + Movie Browser */}
           <div className="lg:col-span-1 space-y-4">
-            {/* User list */}
+            {/* User list with host transfer */}
             <div className="bg-gray-800 rounded-lg p-4">
               <h2 className="text-xl font-bold mb-4">
                 Participants ({room.users.length})
@@ -209,18 +230,35 @@ function Room({ socket }) {
                 {room.users.map((user) => (
                   <div
                     key={user.id}
-                    className="flex items-center justify-between p-2 bg-gray-700 rounded"
+                    className="p-2 bg-gray-700 rounded"
                   >
-                    <span>{user.name}</span>
-                    {user.id === room.hostId && (
-                      <span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded">
-                        HOST
-                      </span>
+                    <div className="flex items-center justify-between mb-1">
+                      <span>{user.name}</span>
+                      {user.id === room.hostId && (
+                        <span className="bg-yellow-500 text-black text-xs px-2 py-1 rounded">
+                          HOST
+                        </span>
+                      )}
+                    </div>
+                    {isHost && user.id !== currentUserId && (
+                      <button
+                        onClick={() => handleTransferHost(user.id)}
+                        className="w-full mt-1 bg-purple-600 hover:bg-purple-700 text-xs py-1 rounded"
+                      >
+                        Make Host
+                      </button>
                     )}
                   </div>
                 ))}
               </div>
             </div>
+
+            {/* Polls */}
+            <Polls
+              socket={socket}
+              roomCode={code}
+              polls={room.polls || []}
+            />
 
             {/* Movie Browser */}
             <MovieBrowser
