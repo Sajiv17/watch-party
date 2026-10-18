@@ -26,6 +26,9 @@ export function setupSocketHandlers(io) {
         return;
       }
 
+      // Check if user is already in the room (reconnection vs new join)
+      const isReconnecting = room.users.has(userId);
+
       // Clear disconnect timeout if user is reconnecting
       if (disconnectedUsers.has(userId)) {
         clearTimeout(disconnectedUsers.get(userId).timeout);
@@ -38,12 +41,15 @@ export function setupSocketHandlers(io) {
       // Send current room state to the joining user
       socket.emit(EVENTS.ROOM_STATE, serializeRoom(room));
 
-      // Notify others that a user joined
-      socket.to(code).emit(EVENTS.USER_JOINED, {
-        user: { id: userId, name: userName }
-      });
-
-      console.log(`${userName} joined room ${code}`);
+      // Only notify others if this is a NEW user, not a reconnection
+      if (!isReconnecting) {
+        socket.to(code).emit(EVENTS.USER_JOINED, {
+          user: { id: userId, name: userName }
+        });
+        console.log(`${userName} joined room ${code}`);
+      } else {
+        console.log(`${userName} reconnected to room ${code}`);
+      }
     });
 
     // Play video

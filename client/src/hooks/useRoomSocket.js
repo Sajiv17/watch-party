@@ -32,10 +32,17 @@ export function useRoomSocket(socket, roomCode) {
 
     // Listen for users joining
     const handleUserJoined = ({ user }) => {
-      setRoom((prev) => ({
-        ...prev,
-        users: [...prev.users, user]
-      }));
+      setRoom((prev) => {
+        // Check if user already exists (shouldn't happen, but defensive programming)
+        const userExists = prev.users.some(u => u.id === user.id);
+        if (userExists) {
+          return prev; // Don't add duplicate
+        }
+        return {
+          ...prev,
+          users: [...prev.users, user]
+        };
+      });
     };
 
     // Listen for users leaving
