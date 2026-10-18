@@ -11,6 +11,9 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
   // Track the last version we applied to prevent re-applying the same state
   const lastAppliedVersionRef = useRef(-1);
 
+  // Track last player state to detect actual user changes
+  const lastPlayerStateRef = useRef(null);
+
   // Store the last known version to send with commands
   const [currentVersion, setCurrentVersion] = useState(0);
 
@@ -72,11 +75,11 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
       player.pauseVideo();
     }
 
-    // Reset the flag after a short delay
+    // Reset the flag after a longer delay to ensure YouTube event doesn't fire
     setTimeout(() => {
       isRemoteUpdateRef.current = false;
       console.log('Remote update flag cleared');
-    }, 200);
+    }, 500); // Increased to 500ms to be safe
 
   }, [player, room?.version]); // Only depend on version changes!
 
@@ -89,6 +92,16 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
       console.log('Ignoring local play (remote update in progress)');
       return;
     }
+
+    // Prevent duplicate sends
+    const now = Date.now();
+    if (lastPlayerStateRef.current?.action === 'play' &&
+        now - lastPlayerStateRef.current.timestamp < 1000) {
+      console.log('Ignoring duplicate play');
+      return;
+    }
+
+    lastPlayerStateRef.current = { action: 'play', timestamp: now };
     console.log('Sending PLAY to server, version:', currentVersion);
     sendPlay(currentVersion);
   };
@@ -99,8 +112,18 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
       return;
     }
     if (!player) return;
+
+    // Prevent duplicate sends
+    const now = Date.now();
+    if (lastPlayerStateRef.current?.action === 'pause' &&
+        now - lastPlayerStateRef.current.timestamp < 1000) {
+      console.log('Ignoring duplicate pause');
+      return;
+    }
+
     try {
       const currentTime = player.getCurrentTime();
+      lastPlayerStateRef.current = { action: 'pause', timestamp: now };
       console.log('Sending PAUSE to server at', currentTime.toFixed(2), 'version:', currentVersion);
       sendPause(currentTime, currentVersion);
     } catch (e) {

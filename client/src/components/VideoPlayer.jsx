@@ -77,20 +77,29 @@ function VideoPlayer({ room, sendPlay, sendPause, sendSeek }) {
           // Use refs to get the latest handlers
           const { isRemoteUpdate, handleLocalPlay, handleLocalPause } = handlersRef.current;
 
+          const stateNames = {
+            '-1': 'UNSTARTED',
+            '0': 'ENDED',
+            '1': 'PLAYING',
+            '2': 'PAUSED',
+            '3': 'BUFFERING',
+            '5': 'CUED'
+          };
+
+          console.log('━━━ YouTube Event:', stateNames[event.data] || event.data, '| Remote flag:', isRemoteUpdate());
+
           // Only handle local actions, not remote updates
           if (isRemoteUpdate()) {
-            console.log('Ignoring state change (remote update)');
+            console.log('  → BLOCKED (remote update in progress)');
             return;
           }
 
-          console.log('Player state changed:', event.data);
-
           // YT.PlayerState: PLAYING = 1, PAUSED = 2
           if (event.data === window.YT.PlayerState.PLAYING) {
-            console.log('User clicked play - sending to server');
+            console.log('  → User PLAY action detected');
             handleLocalPlay();
           } else if (event.data === window.YT.PlayerState.PAUSED) {
-            console.log('User clicked pause - sending to server');
+            console.log('  → User PAUSE action detected');
             handleLocalPause();
           }
         }
