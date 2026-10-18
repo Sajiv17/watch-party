@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { EVENTS } from '../utils/constants';
 import { useRoomSocket } from '../hooks/useRoomSocket';
+import { useClockOffset } from '../hooks/useClockOffset';
 import VideoPlayer from './VideoPlayer';
 
 // Room page: the main watch party interface
@@ -12,6 +13,9 @@ function Room({ socket }) {
 
   // Use the custom hook to manage room state and socket events
   const { room, error, sendPlay, sendPause, sendSeek } = useRoomSocket(socket, code);
+
+  // Estimate clock offset for accurate sync
+  const { offset, isCalibrated, getServerTime } = useClockOffset(socket);
 
   useEffect(() => {
     // Get user info from localStorage
@@ -100,6 +104,7 @@ function Room({ socket }) {
                 sendPlay={sendPlay}
                 sendPause={sendPause}
                 sendSeek={sendSeek}
+                getServerTime={getServerTime}
               />
 
               {/* Video URL input (temporary until Phase 4 TMDB integration) */}

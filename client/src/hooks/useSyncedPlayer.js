@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
  * Custom hook to synchronize YouTube player with server state
  * Handles the critical sync logic: applying remote updates without echo loops
  */
-export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
+export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek, getServerTime) {
   // Flag to prevent echo loops: when we apply a remote update, don't re-broadcast it
   const isRemoteUpdateRef = useRef(false);
 
@@ -140,6 +140,61 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek) {
       console.error('Error getting current time:', e);
     }
   };
+
+  /**
+   * Drift detection and correction
+   * Runs every ~3 seconds to check if player is out of sync
+   */
+  useEffect(() => {
+    if (!player || !room || !room.videoId || !getServerTime) return;
+    if (room.status !== 'playing') return; // Only check drift when playing
+
+    const interval = setInterval(() => {
+      // Don't check drift during remote updates
+      if (isRemoteUpdateRef.current) return;
+
+      try {
+        // Get actual player position
+        const actualPosition = player.getCurrentTime();
+
+        // Calculate expected position based on server state
+        // Use server time (adjusted for clock offset) for accuracy
+        const serverNow = getServerTime();
+        const elapsed = (serverNow - room.updatedAt) / 1000;
+        const expectedPosition = room.position + elapsed;
+
+        // Calculate drift
+        const drift = Math.abs(actualPosition - expectedPosition);
+
+        if (drift > 0.5) {
+          // Drift > 500ms: Hard seek
+          console.log(`⚠️ Drift detected: ${drift.toFixed(2)}s - Hard seeking to ${expectedPosition.toFixed(2)}s`);
+          isRemoteUpdateRef.current = true;
+          player.seekTo(expectedPosition, true);
+          setTimeout(() => {
+            isRemoteUpdateRef.current = false;
+          }, 500);
+        } else if (drift > 0.2) {
+          // Drift 200-500ms: Playback rate nudge
+          const isBehind = actualPosition < expectedPosition;
+          const nudgeRate = isBehind ? 1.05 : 0.95;
+
+          console.log(`🔧 Minor drift: ${drift.toFixed(2)}s - Nudging playback rate to ${nudgeRate}`);
+          player.setPlaybackRate(nudgeRate);
+
+          // Reset to normal speed after 2 seconds
+          setTimeout(() => {
+            player.setPlaybackRate(1.0);
+            console.log('↻ Playback rate reset to 1.0');
+          }, 2000);
+        }
+      } catch (e) {
+        // Player might not be ready, ignore errors
+      }
+    }, 3000); // Check every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [player, room, getServerTime, isRemoteUpdateRef]);
 
   return {
     handleLocalPlay,

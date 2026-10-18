@@ -5,15 +5,15 @@ import { useSyncedPlayer } from '../hooks/useSyncedPlayer';
  * VideoPlayer component using YouTube IFrame Player API
  * Loads the API, creates the player, and handles sync with server state
  */
-function VideoPlayer({ room, sendPlay, sendPause, sendSeek }) {
+function VideoPlayer({ room, sendPlay, sendPause, sendSeek, getServerTime }) {
   const playerRef = useRef(null);
   const playerContainerRef = useRef(null);
   const [player, setPlayer] = useState(null);
   const [apiReady, setApiReady] = useState(false);
 
-  // Use the sync hook to handle play/pause/seek
+  // Use the sync hook to handle play/pause/seek and drift correction
   const { handleLocalPlay, handleLocalPause, handleLocalSeek, isRemoteUpdate } =
-    useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek);
+    useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek, getServerTime);
 
   // Store handlers in refs so event listeners always have latest version
   const handlersRef = useRef({ handleLocalPlay, handleLocalPause, isRemoteUpdate });
