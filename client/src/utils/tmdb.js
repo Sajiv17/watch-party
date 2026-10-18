@@ -3,14 +3,31 @@ const TMDB_API_KEY = import.meta.env.VITE_TMDB_API_KEY;
 const TMDB_BASE_URL = 'https://api.themoviedb.org/3';
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p';
 
+// Debug: Log API key status
+if (!TMDB_API_KEY) {
+  console.error('❌ TMDB_API_KEY is undefined! Check your .env file');
+  console.log('Expected file: /client/.env');
+  console.log('Expected content: VITE_TMDB_API_KEY=your_key_here');
+} else {
+  console.log('✓ TMDB API key loaded:', TMDB_API_KEY.substring(0, 8) + '...');
+}
+
 /**
  * Fetch popular movies
  */
 export async function getPopularMovies(page = 1) {
-  const response = await fetch(
-    `${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&page=${page}`
-  );
-  if (!response.ok) throw new Error('Failed to fetch popular movies');
+  if (!TMDB_API_KEY) {
+    throw new Error('TMDB API key not configured. Add VITE_TMDB_API_KEY to .env file');
+  }
+
+  const url = `${TMDB_BASE_URL}/movie/popular?api_key=${TMDB_API_KEY}&page=${page}`;
+  console.log('Fetching:', url.substring(0, 80) + '...');
+
+  const response = await fetch(url);
+  if (!response.ok) {
+    console.error('TMDB API Error:', response.status, response.statusText);
+    throw new Error('Failed to fetch popular movies');
+  }
   return response.json();
 }
 
