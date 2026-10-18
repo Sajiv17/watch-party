@@ -61,6 +61,44 @@ export function useRoomSocket(socket, roomCode) {
       }));
     };
 
+    // Listen for new chat messages
+    const handleNewMessage = (message) => {
+      setRoom((prev) => ({
+        ...prev,
+        chat: [...(prev.chat || []), message]
+      }));
+    };
+
+    // Listen for playlist updates
+    const handlePlaylistUpdated = (playlist) => {
+      setRoom((prev) => ({
+        ...prev,
+        playlist
+      }));
+    };
+
+    // Listen for poll updates
+    const handlePollUpdated = (poll) => {
+      setRoom((prev) => {
+        const existingIndex = prev.polls?.findIndex(p => p.id === poll.id);
+        let newPolls;
+
+        if (existingIndex >= 0) {
+          // Update existing poll
+          newPolls = [...prev.polls];
+          newPolls[existingIndex] = poll;
+        } else {
+          // Add new poll
+          newPolls = [...(prev.polls || []), poll];
+        }
+
+        return {
+          ...prev,
+          polls: newPolls
+        };
+      });
+    };
+
     // Listen for errors
     const handleError = (err) => {
       setError(err.message || 'An error occurred');
@@ -72,6 +110,9 @@ export function useRoomSocket(socket, roomCode) {
     socket.on(EVENTS.USER_JOINED, handleUserJoined);
     socket.on(EVENTS.USER_LEFT, handleUserLeft);
     socket.on(EVENTS.HOST_CHANGED, handleHostChanged);
+    socket.on(EVENTS.NEW_MESSAGE, handleNewMessage);
+    socket.on(EVENTS.PLAYLIST_UPDATED, handlePlaylistUpdated);
+    socket.on(EVENTS.POLL_UPDATED, handlePollUpdated);
     socket.on(EVENTS.ERROR, handleError);
 
     // Cleanup on unmount
@@ -81,6 +122,9 @@ export function useRoomSocket(socket, roomCode) {
       socket.off(EVENTS.USER_JOINED, handleUserJoined);
       socket.off(EVENTS.USER_LEFT, handleUserLeft);
       socket.off(EVENTS.HOST_CHANGED, handleHostChanged);
+      socket.off(EVENTS.NEW_MESSAGE, handleNewMessage);
+      socket.off(EVENTS.PLAYLIST_UPDATED, handlePlaylistUpdated);
+      socket.off(EVENTS.POLL_UPDATED, handlePollUpdated);
       socket.off(EVENTS.ERROR, handleError);
     };
   }, [socket, roomCode]);

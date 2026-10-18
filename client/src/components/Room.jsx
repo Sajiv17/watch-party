@@ -5,6 +5,10 @@ import { useRoomSocket } from '../hooks/useRoomSocket';
 import { useClockOffset } from '../hooks/useClockOffset';
 import VideoPlayer from './VideoPlayer';
 import MovieBrowser from './MovieBrowser';
+import Chat from './Chat';
+import Reactions from './Reactions';
+import Playlist from './Playlist';
+import Polls from './Polls';
 
 // Room page: the main watch party interface
 function Room({ socket }) {
@@ -71,11 +75,40 @@ function Room({ socket }) {
     });
   };
 
-  // Handle adding movie to playlist (Phase 5 will implement full playlist)
-  const handleAddToPlaylist = (movie) => {
-    // For now, just play the trailer
-    alert(`"${movie.title}" will be added to playlist in Phase 5`);
-    // TODO: Implement in Phase 5
+  // Handle adding movie to playlist
+  const handleAddToPlaylist = async (movie) => {
+    try {
+      // Get the movie's trailer
+      const { getMovieVideos } = await import('../utils/tmdb');
+      const videos = await getMovieVideos(movie.id);
+
+      if (videos.length > 0) {
+        const trailer = videos[0];
+        socket.emit(EVENTS.ADD_TO_PLAYLIST, {
+          code,
+          video: {
+            videoId: trailer.key,
+            title: movie.title,
+            thumbnail: movie.poster_path
+          }
+        });
+      } else {
+        alert('No trailer available for this movie');
+      }
+    } catch (err) {
+      console.error('Failed to add to playlist:', err);
+    }
+  };
+
+  // Handle host transfer
+  const handleTransferHost = (newHostId) => {
+    if (!isHost) return;
+
+    socket.emit(EVENTS.TRANSFER_HOST, {
+      code,
+      currentHostId: currentUserId,
+      newHostId
+    });
   };
 
   return (
