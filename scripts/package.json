@@ -1,0 +1,11 @@
+{
+  "name": "watch-party-scripts",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "loadtest": "node loadtest.js"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.4"
+  }
+}
