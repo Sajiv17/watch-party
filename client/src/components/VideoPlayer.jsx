@@ -132,17 +132,36 @@ function VideoPlayer({ room, sendPlay, sendPause, sendSeek, getServerTime }) {
    * We detect this by checking if the player time jumped significantly
    */
   useEffect(() => {
-    if (!player) return;
+    if (!player || !room?.videoId) return;
+
+    let lastPosition = 0;
 
     const interval = setInterval(() => {
+      // Skip during remote updates (drift correction or sync)
       if (isRemoteUpdate()) return;
 
-      // This is a basic seek detection
-      // In Phase 3 we'll add drift correction here
-    }, 1000);
+      try {
+        const currentPosition = player.getCurrentTime();
+
+        // Calculate the jump in position
+        const jump = Math.abs(currentPosition - lastPosition);
+
+        // If position jumped by more than 2 seconds, user likely seeked
+        // Normal playback advances by ~0.5s per check (500ms interval)
+        // Give some buffer for lag, so anything > 2s is a seek
+        if (jump > 2) {
+          console.log(`🎯 Seek detected: jumped ${jump.toFixed(2)}s from ${lastPosition.toFixed(2)} to ${currentPosition.toFixed(2)}`);
+          handleLocalSeek();
+        }
+
+        lastPosition = currentPosition;
+      } catch (e) {
+        // Player might not be ready yet
+      }
+    }, 500); // Check every 500ms for responsiveness
 
     return () => clearInterval(interval);
-  }, [player, isRemoteUpdate]);
+  }, [player, room?.videoId, isRemoteUpdate, handleLocalSeek]);
 
   return (
     <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
