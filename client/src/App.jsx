@@ -5,8 +5,8 @@ import Lobby from './components/Lobby';
 import Room from './components/Room';
 
 // Initialize socket connection
-// The server URL comes from environment variable (for deployment) or defaults to localhost
-const SOCKET_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
+// Use relative path for ngrok compatibility (proxied through Vite)
+const SOCKET_URL = import.meta.env.VITE_SERVER_URL || window.location.origin;
 
 function App() {
   const [socket, setSocket] = useState(null);
