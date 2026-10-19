@@ -130,13 +130,14 @@ export function useRoomSocket(socket, roomCode) {
   }, [socket, roomCode]);
 
   /**
-   * Send play command to server
-   * The server will broadcast to all clients including us
+   * Send play command to server with current position
+   * This allows pause-drag-play seeking to work
    */
-  const sendPlay = (version) => {
+  const sendPlay = (position, version) => {
     socket.emit(EVENTS.PLAY, {
       code: roomCode,
       userId: localStorage.getItem('clientId'),
+      position,
       version
     });
   };

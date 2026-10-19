@@ -53,13 +53,16 @@ export function setupSocketHandlers(io) {
     });
 
     // Play video
-    socket.on(EVENTS.PLAY, ({ code, userId, version }) => {
+    socket.on(EVENTS.PLAY, ({ code, userId, position, version }) => {
       const room = rooms.getRoom(code);
       if (!room) return;
 
+      // Use provided position (for pause-drag-play seeking) or calculate current position
+      const playPosition = position !== undefined ? position : calculateCurrentPosition(room);
+
       const result = rooms.updateVideoState(code, {
         status: 'playing',
-        position: calculateCurrentPosition(room)
+        position: playPosition
       }, version);
 
       if (result.stale) {

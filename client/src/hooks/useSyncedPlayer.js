@@ -92,6 +92,7 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek, get
       console.log('Ignoring local play (remote update in progress)');
       return;
     }
+    if (!player) return;
 
     // Prevent duplicate sends
     const now = Date.now();
@@ -101,9 +102,15 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek, get
       return;
     }
 
-    lastPlayerStateRef.current = { action: 'play', timestamp: now };
-    console.log('Sending PLAY to server, version:', currentVersion);
-    sendPlay(currentVersion);
+    try {
+      // Get CURRENT position (important for pause-drag-play seeking!)
+      const currentTime = player.getCurrentTime();
+      lastPlayerStateRef.current = { action: 'play', timestamp: now };
+      console.log('Sending PLAY to server at', currentTime.toFixed(2), 'version:', currentVersion);
+      sendPlay(currentTime, currentVersion);
+    } catch (e) {
+      console.error('Error getting current time:', e);
+    }
   };
 
   const handleLocalPause = () => {
