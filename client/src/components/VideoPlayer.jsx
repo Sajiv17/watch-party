@@ -128,42 +128,17 @@ function VideoPlayer({ room, sendPlay, sendPause, sendSeek, getServerTime }) {
   }, [player, room?.videoId]);
 
   /**
-   * Handle seek when user drags the progress bar
-   * We detect this by checking if the player time jumped significantly
-   * Use a ref to track lastPosition so it doesn't reset on re-renders
+   * SEEK HANDLING:
+   * We DON'T auto-detect seeks because it causes too many false positives.
+   *
+   * Instead, seeking works like this:
+   * 1. User pauses video (sends pause + position to everyone)
+   * 2. User drags seek bar locally
+   * 3. User plays again (sends play + new position to everyone)
+   *
+   * Drift correction (runs every 3s) handles any small sync issues.
+   * This is simpler and more reliable than auto-detect seeks.
    */
-  const lastPositionRef = useRef(0);
-
-  useEffect(() => {
-    if (!player || !room?.videoId) return;
-
-    const interval = setInterval(() => {
-      // Skip during remote updates (drift correction or sync)
-      if (isRemoteUpdate()) return;
-
-      try {
-        const currentPosition = player.getCurrentTime();
-        const lastPosition = lastPositionRef.current;
-
-        // Calculate the jump in position
-        const jump = Math.abs(currentPosition - lastPosition);
-
-        // If position jumped by more than 2 seconds, user likely seeked
-        // Normal playback advances by ~0.5s per check (500ms interval)
-        // Give some buffer for lag, so anything > 2s is a seek
-        if (jump > 2 && lastPosition > 0) { // lastPosition > 0 to avoid false positives on first check
-          console.log(`🎯 Seek detected: jumped ${jump.toFixed(2)}s from ${lastPosition.toFixed(2)} to ${currentPosition.toFixed(2)}`);
-          handleLocalSeek();
-        }
-
-        lastPositionRef.current = currentPosition;
-      } catch (e) {
-        // Player might not be ready yet
-      }
-    }, 500); // Check every 500ms for responsiveness
-
-    return () => clearInterval(interval);
-  }, [player, room?.videoId]);
 
   return (
     <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">

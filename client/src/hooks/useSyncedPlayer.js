@@ -14,9 +14,6 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek, get
   // Track last player state to detect actual user changes
   const lastPlayerStateRef = useRef(null);
 
-  // Flag to temporarily disable drift correction after local seeks
-  const skipDriftCheckRef = useRef(false);
-
   // Store the last known version to send with commands
   const [currentVersion, setCurrentVersion] = useState(0);
 
@@ -139,14 +136,6 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek, get
     try {
       const currentTime = player.getCurrentTime();
       console.log('Sending SEEK to server to', currentTime.toFixed(2), 'version:', currentVersion);
-
-      // Disable drift correction temporarily to give server time to process
-      skipDriftCheckRef.current = true;
-      setTimeout(() => {
-        skipDriftCheckRef.current = false;
-        console.log('Drift check re-enabled after seek');
-      }, 1500); // Wait 1.5s for server to process and broadcast
-
       sendSeek(currentTime, currentVersion);
     } catch (e) {
       console.error('Error getting current time:', e);
@@ -162,8 +151,8 @@ export function useSyncedPlayer(player, room, sendPlay, sendPause, sendSeek, get
     if (room.status !== 'playing') return; // Only check drift when playing
 
     const interval = setInterval(() => {
-      // Don't check drift during remote updates or right after local seeks
-      if (isRemoteUpdateRef.current || skipDriftCheckRef.current) return;
+      // Don't check drift during remote updates
+      if (isRemoteUpdateRef.current) return;
 
       try {
         // Get actual player position
