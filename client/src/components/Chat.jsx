@@ -9,8 +9,13 @@ function Chat({ socket, roomCode, messages }) {
   const messagesEndRef = useRef(null);
 
   // Auto-scroll to bottom when new messages arrive
+  // Use 'nearest' to only scroll the chat container, not the whole page
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',  // Don't scroll the whole page!
+      inline: 'nearest'
+    });
   }, [messages]);
 
   const handleSendMessage = (e) => {

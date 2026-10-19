@@ -130,11 +130,12 @@ function VideoPlayer({ room, sendPlay, sendPause, sendSeek, getServerTime }) {
   /**
    * Handle seek when user drags the progress bar
    * We detect this by checking if the player time jumped significantly
+   * Use a ref to track lastPosition so it doesn't reset on re-renders
    */
+  const lastPositionRef = useRef(0);
+
   useEffect(() => {
     if (!player || !room?.videoId) return;
-
-    let lastPosition = 0;
 
     const interval = setInterval(() => {
       // Skip during remote updates (drift correction or sync)
@@ -142,6 +143,7 @@ function VideoPlayer({ room, sendPlay, sendPause, sendSeek, getServerTime }) {
 
       try {
         const currentPosition = player.getCurrentTime();
+        const lastPosition = lastPositionRef.current;
 
         // Calculate the jump in position
         const jump = Math.abs(currentPosition - lastPosition);
@@ -149,19 +151,19 @@ function VideoPlayer({ room, sendPlay, sendPause, sendSeek, getServerTime }) {
         // If position jumped by more than 2 seconds, user likely seeked
         // Normal playback advances by ~0.5s per check (500ms interval)
         // Give some buffer for lag, so anything > 2s is a seek
-        if (jump > 2) {
+        if (jump > 2 && lastPosition > 0) { // lastPosition > 0 to avoid false positives on first check
           console.log(`🎯 Seek detected: jumped ${jump.toFixed(2)}s from ${lastPosition.toFixed(2)} to ${currentPosition.toFixed(2)}`);
           handleLocalSeek();
         }
 
-        lastPosition = currentPosition;
+        lastPositionRef.current = currentPosition;
       } catch (e) {
         // Player might not be ready yet
       }
     }, 500); // Check every 500ms for responsiveness
 
     return () => clearInterval(interval);
-  }, [player, room?.videoId, isRemoteUpdate, handleLocalSeek]);
+  }, [player, room?.videoId]);
 
   return (
     <div className="relative w-full aspect-video bg-black rounded-lg overflow-hidden">
