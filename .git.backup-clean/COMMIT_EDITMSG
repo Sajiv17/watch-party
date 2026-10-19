@@ -1,0 +1,16 @@
+Fix: Proxy Socket.io through Vite for ngrok compatibility
+
+Problem: Client couldn't connect to server via ngrok because
+socket was hardcoded to localhost:3001
+
+Solution:
+- Added Vite proxy for /socket.io -> localhost:3001
+- Changed socket URL to window.location.origin (same as page)
+- Now only ONE ngrok tunnel needed (port 5173)
+
+How it works:
+- ngrok URL -> Vite dev server (5173)
+- Vite proxies /socket.io -> backend (3001)
+- Everything works through single ngrok tunnel!
+
+Co-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>

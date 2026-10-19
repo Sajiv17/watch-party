@@ -1,0 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UNDERSTANDING</title>
+    
+<style>
+    @media print {
+        @page {
+            margin: 1.5cm;
+            size: A4;
+        }
+    }
+
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+        font-size: 11pt;
+        line-height: 1.6;
+        color: #1a1a1a;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+        background: white;
+    }
+
+    h1 {
+        font-size: 28pt;
+        font-weight: 700;
+        margin-top: 0.5em;
+        margin-bottom: 0.5em;
+        color: #000;
+        border-bottom: 3px solid #0066cc;
+        padding-bottom: 0.3em;
+        page-break-after: avoid;
+    }
+
+    h2 {
+        font-size: 20pt;
+        font-weight: 600;
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+        color: #000;
+        border-bottom: 2px solid #e0e0e0;
+        padding-bottom: 0.2em;
+        page-break-after: avoid;
+    }
+
+    h3 {
+        font-size: 16pt;
+        font-weight: 600;
+        margin-top: 1.2em;
+        margin-bottom: 0.4em;
+        color: #222;
+        page-break-after: avoid;
+    }
+
+    h4 {
+        font-size: 13pt;
+        font-weight: 600;
+        margin-top: 1em;
+        margin-bottom: 0.3em;
+        color: #333;
+        page-break-after: avoid;
+    }
+
+    code {
+        background-color: #f6f8fa;
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, 'Courier New', monospace;
+        font-size: 10pt;
+        color: #d73a49;
+        border: 1px solid #e1e4e8;
+    }
+
+    pre {
+        background-color: #f6f8fa;
+        border: 1px solid #d0d7de;
+        border-radius: 6px;
+        padding: 16px;
+        overflow-x: auto;
+        margin: 1em 0;
+        page-break-inside: avoid;
+    }
+
+    pre code {
+        background-color: transparent;
+        padding: 0;
+        color: #000;
+        font-size: 9.5pt;
+        border: none;
+    }
+
+    ul, ol {
+        margin: 0.5em 0;
+        padding-left: 2.5em;
+    }
+
+    li {
+        margin: 0.3em 0;
+    }
+
+    blockquote {
+        border-left: 4px solid #0066cc;
+        padding-left: 1em;
+        margin-left: 0;
+        margin-right: 0;
+        color: #555;
+        font-style: italic;
+        background-color: #f9f9f9;
+        padding: 0.5em 1em;
+        border-radius: 0 4px 4px 0;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1em 0;
+        page-break-inside: avoid;
+    }
+
+    th, td {
+        border: 1px solid #d0d7de;
+        padding: 8px 12px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f6f8fa;
+        font-weight: 600;
+    }
+
+    tr:nth-child(even) {
+        background-color: #fafafa;
+    }
+
+    a {
+        color: #0066cc;
+        text-decoration: none;
+    }
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+    hr {
+        border: none;
+        border-top: 2px solid #e0e0e0;
+        margin: 2em 0;
+    }
+
+    strong {
+        font-weight: 600;
+        color: #000;
+    }
+
+    em {
+        font-style: italic;
+    }
+
+    .print-button {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: #0066cc;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14pt;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        z-index: 1000;
+    }
+
+    .print-button:hover {
+        background: #0052a3;
+    }
+
+    @media print {
+        .print-button {
+            display: none;
+        }
+    }
+</style>
+
+</head>
+<body>
+    <button class="print-button" onclick="window.print()">🖨️ Print to PDF</button>
+    <h1>Understanding the Watch Party Project</h1>
+<p>This document explains how this real-time watch party application works, the technologies used, and the reasoning behind key design decisions. Think of it as a deep dive into your own project.</p>
+<hr />
+<h2>Table of Contents</h2>
+<ol>
+<li><a href="#the-big-picture">The Big Picture - What We Built</a></li>
+<li><a href="#tech-stack">Tech Stack - Why These Tools?</a></li>
+<li><a href="#how-video-sync-works">How Video Sync Actually Works</a></li>
+<li><a href="#frontend-architecture">Frontend Architecture</a></li>
+<li><a href="#backend-architecture">Backend Architecture</a></li>
+<li><a href="#real-time-communication">Real-Time Communication</a></li>
+<li><a href="#handling-edge-cases">Handling Edge Cases</a></li>
+<li><a href="#code-walkthrough">Code Walkthrough - Key Files</a></li>
+</ol>
+<hr />
+<h2>The Big Picture</h2>
+<h3>What We Built</h3>
+<p>A web app where multiple people can watch YouTube videos together in perfect sync. When one person plays, pauses, or seeks the video, everyone else sees it happen instantly on their screen.</p>
+<h3>The Core Challenge</h3>
+<p><strong>How do you keep 10+ people's video players synchronized in real-time?</strong></p>
+<p>Simple answer: You can't trust each browser to stay in sync on its own. Network delays, different internet speeds, and buffering would cause everyone to drift apart within seconds.</p>
+<p><strong>Our solution:</strong> The server is the "source of truth". All state lives on the server, and every client just follows what the server says.</p>
+<hr />
+<h2>Tech Stack</h2>
+<h3>Frontend: React 18 + Vite</h3>
+<p><strong>Why React?</strong><br />
+- Component-based architecture (each feature is its own component)<br />
+- State management is straightforward (useState, useEffect)<br />
+- Large ecosystem (lots of libraries and help available)</p>
+<p><strong>Why Vite instead of Create React App?</strong><br />
+- Much faster dev server (hot reload is instant)<br />
+- Better build performance<br />
+- Modern out of the box (ES modules, etc.)</p>
+<p><strong>What React gives us:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="nv">src</span><span class="o">/</span>
+├──<span class="w"> </span><span class="nv">components</span><span class="o">/</span><span class="w">        </span>#<span class="w"> </span><span class="nv">UI</span><span class="w"> </span><span class="nv">pieces</span><span class="w"> </span><span class="ss">(</span><span class="nv">Room</span>,<span class="w"> </span><span class="nv">Chat</span>,<span class="w"> </span><span class="nv">Playlist</span>,<span class="w"> </span><span class="nv">etc</span>.<span class="ss">)</span>
+├──<span class="w"> </span><span class="nv">hooks</span><span class="o">/</span><span class="w">            </span>#<span class="w"> </span><span class="nv">Reusable</span><span class="w"> </span><span class="nv">logic</span><span class="w"> </span><span class="ss">(</span><span class="nv">socket</span><span class="w"> </span><span class="nv">connection</span>,<span class="w"> </span><span class="nv">video</span><span class="w"> </span><span class="nv">sync</span><span class="ss">)</span>
+├──<span class="w"> </span><span class="nv">services</span><span class="o">/</span><span class="w">         </span>#<span class="w"> </span><span class="nv">External</span><span class="w"> </span><span class="nv">APIs</span><span class="w"> </span><span class="ss">(</span><span class="nv">TMDB</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="nv">movie</span><span class="w"> </span><span class="nv">search</span><span class="ss">)</span>
+└──<span class="w"> </span><span class="nv">App</span>.<span class="nv">jsx</span><span class="w">           </span>#<span class="w"> </span><span class="nv">Routes</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">socket</span><span class="w"> </span><span class="nv">setup</span>
+</code></pre></div>
+
+<h3>Backend: Node.js + Express + Socket.io</h3>
+<p><strong>Why Node.js?</strong><br />
+- JavaScript on both frontend and backend (same language)<br />
+- Great for real-time apps (event-driven, non-blocking)<br />
+- Huge ecosystem (npm packages)</p>
+<p><strong>Why Express?</strong><br />
+- Simple HTTP server framework<br />
+- Minimal but powerful<br />
+- Easy to add routes if needed</p>
+<p><strong>Why Socket.io instead of plain WebSockets?</strong><br />
+- Auto-reconnection (if network drops, it reconnects automatically)<br />
+- Rooms support (easy to group users by room code)<br />
+- Fallback to HTTP long-polling if WebSockets blocked<br />
+- Better error handling</p>
+<h3>YouTube IFrame API</h3>
+<p><strong>Why not just embed a <code>&lt;video&gt;</code> tag?</strong><br />
+- Most YouTube videos block direct embedding<br />
+- YouTube IFrame API is official and supported<br />
+- Gives us programmatic control (play, pause, seek, get position)</p>
+<p><strong>What it provides:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="nx">player</span><span class="p">.</span><span class="nx">playVideo</span><span class="p">()</span><span class="w">           </span><span class="c1">// Play</span>
+<span class="nx">player</span><span class="p">.</span><span class="nx">pauseVideo</span><span class="p">()</span><span class="w">          </span><span class="c1">// Pause</span>
+<span class="nx">player</span><span class="p">.</span><span class="nx">seekTo</span><span class="p">(</span><span class="nx">seconds</span><span class="p">)</span><span class="w">       </span><span class="c1">// Jump to time</span>
+<span class="nx">player</span><span class="p">.</span><span class="nx">getCurrentTime</span><span class="p">()</span><span class="w">      </span><span class="c1">// Get current position</span>
+<span class="nx">player</span><span class="p">.</span><span class="nx">getPlayerState</span><span class="p">()</span><span class="w">      </span><span class="c1">// Playing? Paused? Buffering?</span>
+</code></pre></div>
+
+<h3>TMDB API (The Movie Database)</h3>
+<p><strong>Why do we need this?</strong><br />
+- Movie posters, titles, descriptions<br />
+- Search functionality (search entire movie database)<br />
+- Trending/popular movie lists</p>
+<p><strong>Without TMDB:</strong><br />
+- We'd only have YouTube URLs (no metadata)<br />
+- No pretty UI with posters<br />
+- No search/browse experience</p>
+<hr />
+<h2>How Video Sync Actually Works</h2>
+<p>This is the heart of the project. Let me break it down step by step.</p>
+<h3>The Wrong Way (What We DON'T Do)</h3>
+<p>❌ <strong>Client-side sync:</strong> Each browser tries to match position with others<br />
+- Problem: Network delays mean everyone drifts apart<br />
+- Problem: Who decides what's "correct"?</p>
+<p>❌ <strong>Peer-to-peer:</strong> Browsers talk directly to each other<br />
+- Problem: What if two people click play at once? Conflict!<br />
+- Problem: New joiners don't know who to sync with</p>
+<h3>The Right Way (What We DO)</h3>
+<p>✅ <strong>Server-authoritative state:</strong><br />
+- Server holds the ONE TRUE STATE<br />
+- Clients just render what server tells them</p>
+<p><strong>Example flow when you click Play:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="n">You</span><span class="w"> </span><span class="p">(</span><span class="n">Tab</span><span class="w"> </span><span class="mi">1</span><span class="p">)</span><span class="w">                </span><span class="n">Server</span><span class="w">                  </span><span class="n">Friend</span><span class="w"> </span><span class="p">(</span><span class="n">Tab</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span>
+<span class="w">    </span><span class="o">|</span><span class="w">                         </span><span class="o">|</span><span class="w">                           </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="n">Click</span><span class="w"> </span><span class="n">Play</span><span class="w">              </span><span class="o">|</span><span class="w">                           </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|------------------------&gt;|</span><span class="w">                           </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="s">"PLAY at 45.3s"</span><span class="w">         </span><span class="o">|</span><span class="w">                           </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|</span><span class="w">                         </span><span class="o">|</span><span class="w">                           </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|</span><span class="w">                    </span><span class="n">Update</span><span class="w"> </span><span class="n">state</span><span class="o">:</span><span class="w">                    </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|</span><span class="w">                    </span><span class="n">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">45.3</span><span class="w">                  </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|</span><span class="w">                    </span><span class="n">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">playing</span><span class="w">                 </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|</span><span class="w">                    </span><span class="n">version</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">123</span><span class="w">                    </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|</span><span class="w">                         </span><span class="o">|</span><span class="w">                           </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|</span><span class="w">                         </span><span class="o">|--------------------------&gt;|</span>
+<span class="w">    </span><span class="o">|</span><span class="w">                         </span><span class="o">|</span><span class="w"> </span><span class="s">"VIDEO_STATE: play 45.3s"</span><span class="w"> </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|&lt;------------------------|</span><span class="w">                           </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|</span><span class="w"> </span><span class="s">"VIDEO_STATE: play..."</span><span class="w">  </span><span class="o">|</span><span class="w">                           </span><span class="o">|</span>
+<span class="w">    </span><span class="o">|</span><span class="w">                         </span><span class="o">|</span><span class="w">                           </span><span class="o">|</span>
+<span class="n">Both</span><span class="w"> </span><span class="n">tabs</span><span class="w"> </span><span class="n">play</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="mf">45.3</span><span class="n">s</span><span class="w"> </span><span class="n">because</span><span class="w"> </span><span class="n">server</span><span class="w"> </span><span class="n">said</span><span class="w"> </span><span class="n">so</span>
+</code></pre></div>
+
+<h3>Version Control (Preventing Conflicts)</h3>
+<p><strong>The Problem:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="mf">10</span><span class="p">:</span><span class="mf">00</span><span class="p">:</span><span class="mf">00</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">You</span><span class="w"> </span><span class="n">click</span><span class="w"> </span><span class="n">pause</span>
+<span class="mf">10</span><span class="p">:</span><span class="mf">00</span><span class="p">:</span><span class="mf">00</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">Friend</span><span class="w"> </span><span class="n">clicks</span><span class="w"> </span><span class="n">play</span><span class="w"> </span><span class="p">(</span><span class="n">at</span><span class="w"> </span><span class="n">exact</span><span class="w"> </span><span class="n">same</span><span class="w"> </span><span class="n">time</span><span class="err">!</span><span class="p">)</span>
+
+<span class="n">Who</span><span class="w"> </span><span class="n">wins</span><span class="err">?</span>
+</code></pre></div>
+
+<p><strong>The Solution: Version Numbers</strong></p>
+<p>Every state change increments a version:</p>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">'playing'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">position</span><span class="o">:</span><span class="w"> </span><span class="mf">45.3</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">version</span><span class="o">:</span><span class="w"> </span><span class="mf">123</span><span class="w">    </span><span class="c1">// ← This!</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>When you send a command, you include the version you saw:</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'PLAY'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">version</span><span class="o">:</span><span class="w"> </span><span class="mf">123</span><span class="w"> </span><span class="p">})</span>
+</code></pre></div>
+
+<p>Server checks:</p>
+<div class="codehilite"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">command</span><span class="p">.</span><span class="nx">version</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">reject</span><span class="p">();</span><span class="w"> </span><span class="c1">// Stale! Someone else changed it first</span>
+<span class="w">  </span><span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">// Increment and accept</span>
+</code></pre></div>
+
+<p><strong>Result:</strong> First command wins, second command rejected. Clean, deterministic.</p>
+<h3>Drift Correction (Staying in Sync)</h3>
+<p><strong>Even with server-authoritative state, drift happens:</strong><br />
+- Network delays (your play command took 100ms to reach server)<br />
+- Buffering (YouTube pauses to load, we don't know about it)<br />
+- Browser performance (video stutters on slow device)</p>
+<p><strong>Our solution: Periodic checks</strong></p>
+<p>Every 3 seconds, each client:</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">serverTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">calculateCurrentPosition</span><span class="p">(</span><span class="nx">room</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">myTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">player</span><span class="p">.</span><span class="nx">getCurrentTime</span><span class="p">();</span>
+
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">serverTime</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">myTime</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// We're off by more than 2 seconds!</span>
+<span class="w">  </span><span class="nx">player</span><span class="p">.</span><span class="nx">seekTo</span><span class="p">(</span><span class="nx">serverTime</span><span class="p">);</span><span class="w"> </span><span class="c1">// Snap back to correct position</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>This runs silently in background. Users never notice it because 2 second threshold is generous.</p>
+<h3>Clock Offset Calibration</h3>
+<p><strong>Problem:</strong> Server timestamps use server's clock. Your computer's clock might be different!</p>
+<p><strong>Solution:</strong> Measure the offset once at connection:</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// Send ping</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">t1</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">();</span>
+<span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'PING'</span><span class="p">);</span>
+
+<span class="c1">// Receive pong</span>
+<span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'PONG'</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">serverTime</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">t2</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">();</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">rtt</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">t2</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">t1</span><span class="p">;</span><span class="w">  </span><span class="c1">// Round-trip time</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">offset</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">serverTime</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="p">(</span><span class="nx">t1</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nx">rtt</span><span class="o">/</span><span class="mf">2</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Now we know: server's clock is `offset` ms ahead/behind ours</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p>Used when calculating current position from server's last update time.</p>
+<hr />
+<h2>Frontend Architecture</h2>
+<h3>Component Hierarchy</h3>
+<div class="codehilite"><pre><span></span><code>App
+├── Lobby (create/join room)
+└── Room (main watch party UI)
+    ├── VideoPlayer (YouTube player)
+    ├── MovieBrowser (search/browse movies)
+    ├── Chat (live chat)
+    ├── Playlist (queue of videos)
+    ├── Reactions (floating emojis)
+    └── Participants (who's here)
+</code></pre></div>
+
+<h3>Custom Hooks (Reusable Logic)</h3>
+<p><strong>Why hooks?</strong><br />
+- Separate logic from UI<br />
+- Reusable across components<br />
+- Easier to test</p>
+<p><strong>useRoomSocket.js</strong> - Socket connection and commands</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">sendPlay</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">sendPause</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">sendSeek</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">sendMessage</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">roomState</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">participants</span>
+<span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useRoomSocket</span><span class="p">(</span><span class="nx">socket</span><span class="p">,</span><span class="w"> </span><span class="nx">roomCode</span><span class="p">);</span>
+
+<span class="c1">// Component just calls sendPlay() - hook handles socket details</span>
+</code></pre></div>
+
+<p><strong>useSyncedPlayer.js</strong> - Video sync logic</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">playerRef</span><span class="w"> </span><span class="p">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useSyncedPlayer</span><span class="p">(</span>
+<span class="w">  </span><span class="nx">roomState</span><span class="p">,</span>
+<span class="w">  </span><span class="p">{</span><span class="w"> </span><span class="nx">sendPlay</span><span class="p">,</span><span class="w"> </span><span class="nx">sendPause</span><span class="p">,</span><span class="w"> </span><span class="nx">sendSeek</span><span class="w"> </span><span class="p">}</span>
+<span class="p">);</span>
+
+<span class="c1">// Hook handles:</span>
+<span class="c1">// - Playing/pausing when roomState changes</span>
+<span class="c1">// - Seeking when position changes</span>
+<span class="c1">// - Drift correction every 3s</span>
+<span class="c1">// - Preventing echo loops</span>
+</code></pre></div>
+
+<p><strong>Why separate these?</strong><br />
+- VideoPlayer component just renders YouTube IFrame<br />
+- useSyncedPlayer handles ALL sync logic<br />
+- Easy to swap out video player if needed</p>
+<h3>State Management Strategy</h3>
+<p><strong>Room-level state</strong> (shared by all users):</p>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
+<span class="w">  </span><span class="nx">code</span><span class="o">:</span><span class="w"> </span><span class="s1">'ABC123'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">currentVideo</span><span class="o">:</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">url</span><span class="p">,</span><span class="w"> </span><span class="nx">title</span><span class="p">,</span><span class="w"> </span><span class="nx">thumbnail</span><span class="w"> </span><span class="p">},</span>
+<span class="w">  </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">'playing'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">position</span><span class="o">:</span><span class="w"> </span><span class="mf">45.3</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">version</span><span class="o">:</span><span class="w"> </span><span class="mf">123</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">host</span><span class="o">:</span><span class="w"> </span><span class="s1">'user-123'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">participants</span><span class="o">:</span><span class="w"> </span><span class="p">[...],</span>
+<span class="w">  </span><span class="nx">playlist</span><span class="o">:</span><span class="w"> </span><span class="p">[...],</span>
+<span class="w">  </span><span class="nx">messages</span><span class="o">:</span><span class="w"> </span><span class="p">[...]</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Local state</strong> (per user):</p>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">username</span><span class="p">,</span><span class="w"> </span><span class="nx">setUsername</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="s1">''</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">searchQuery</span><span class="p">,</span><span class="w"> </span><span class="nx">setSearchQuery</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="s1">''</span><span class="p">);</span>
+<span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">isSearching</span><span class="p">,</span><span class="w"> </span><span class="nx">setIsSearching</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+</code></pre></div>
+
+<p><strong>Rule:</strong> Anything that needs to sync goes through socket. Anything local stays in component state.</p>
+<hr />
+<h2>Backend Architecture</h2>
+<h3>In-Memory Storage</h3>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">rooms</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="s1">'ABC123'</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">code</span><span class="o">:</span><span class="w"> </span><span class="s1">'ABC123'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">currentVideo</span><span class="o">:</span><span class="w"> </span><span class="p">{...},</span>
+<span class="w">    </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">'playing'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">position</span><span class="o">:</span><span class="w"> </span><span class="mf">45.3</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">lastUpdate</span><span class="o">:</span><span class="w"> </span><span class="mf">1634567890</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">version</span><span class="o">:</span><span class="w"> </span><span class="mf">123</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">participants</span><span class="o">:</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">Map</span><span class="p">(),</span>
+<span class="w">    </span><span class="nx">playlist</span><span class="o">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nx">messages</span><span class="o">:</span><span class="w"> </span><span class="p">[],</span>
+<span class="w">    </span><span class="nx">host</span><span class="o">:</span><span class="w"> </span><span class="s1">'user-123'</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Why in-memory?</strong><br />
+- Fast (no database queries)<br />
+- Simple (just a JavaScript object)<br />
+- Ephemeral is fine (rooms don't need to persist after everyone leaves)</p>
+<p><strong>Limitation:</strong><br />
+- Server restart = all rooms lost<br />
+- Can't scale to multiple servers (no shared state)</p>
+<p><strong>Production fix:</strong><br />
+- Use Redis for shared state<br />
+- Rooms persist across server restarts<br />
+- Multiple servers can share room state</p>
+<h3>Event Handlers</h3>
+<div class="codehilite"><pre><span></span><code><span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'CREATE_ROOM'</span><span class="p">,</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">code</span><span class="p">,</span><span class="w"> </span><span class="nx">username</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">rooms</span><span class="p">[</span><span class="nx">code</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">createNewRoom</span><span class="p">(</span><span class="nx">code</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">socket</span><span class="p">.</span><span class="nx">join</span><span class="p">(</span><span class="nx">code</span><span class="p">);</span><span class="w"> </span><span class="c1">// Socket.io room (for broadcasting)</span>
+<span class="w">  </span><span class="c1">// ...</span>
+<span class="p">});</span>
+
+<span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'PLAY'</span><span class="p">,</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">code</span><span class="p">,</span><span class="w"> </span><span class="nx">position</span><span class="p">,</span><span class="w"> </span><span class="nx">version</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">room</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">rooms</span><span class="p">[</span><span class="nx">code</span><span class="p">];</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">room</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Version check (prevent conflicts)</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">version</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'ERROR'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="s1">'State changed'</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Update state</span>
+<span class="w">  </span><span class="nx">room</span><span class="p">.</span><span class="nx">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'playing'</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">room</span><span class="p">.</span><span class="nx">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">position</span><span class="p">;</span>
+<span class="w">  </span><span class="nx">room</span><span class="p">.</span><span class="nx">lastUpdate</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">();</span>
+<span class="w">  </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="o">++</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Broadcast to all clients in this room</span>
+<span class="w">  </span><span class="nx">io</span><span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="nx">code</span><span class="p">).</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'VIDEO_STATE'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">status</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">position</span><span class="o">:</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">position</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">version</span><span class="o">:</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p><strong>Pattern:</strong><br />
+1. Validate (does room exist? is version correct?)<br />
+2. Update state<br />
+3. Broadcast to all clients</p>
+<h3>Broadcasting Strategies</h3>
+<p><strong>io.to(code).emit()</strong> - Send to everyone in room (including sender)</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">io</span><span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">'ABC123'</span><span class="p">).</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'VIDEO_STATE'</span><span class="p">,</span><span class="w"> </span><span class="p">{...});</span>
+<span class="c1">// Everyone sees video state update</span>
+</code></pre></div>
+
+<p><strong>socket.to(code).emit()</strong> - Send to everyone EXCEPT sender</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">socket</span><span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="s1">'ABC123'</span><span class="p">).</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'USER_JOINED'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">username</span><span class="w"> </span><span class="p">});</span>
+<span class="c1">// You don't need notification that you joined</span>
+</code></pre></div>
+
+<p><strong>socket.emit()</strong> - Send to just this one client</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'ERROR'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="s1">'Room not found'</span><span class="w"> </span><span class="p">});</span>
+<span class="c1">// Only you see the error</span>
+</code></pre></div>
+
+<hr />
+<h2>Real-Time Communication</h2>
+<h3>Socket.io Events We Use</h3>
+<p><strong>Connection Management:</strong><br />
+- <code>connection</code> - New client connected<br />
+- <code>disconnect</code> - Client disconnected<br />
+- <code>PING</code>/<code>PONG</code> - Clock offset calibration</p>
+<p><strong>Room Management:</strong><br />
+- <code>CREATE_ROOM</code> - Create new room<br />
+- <code>JOIN_ROOM</code> - Join existing room<br />
+- <code>LEAVE_ROOM</code> - Leave room<br />
+- <code>USER_JOINED</code> - Broadcast when someone joins<br />
+- <code>USER_LEFT</code> - Broadcast when someone leaves</p>
+<p><strong>Video Control:</strong><br />
+- <code>PLAY</code> - Play video (with position)<br />
+- <code>PAUSE</code> - Pause video (with position)<br />
+- <code>SEEK</code> - Seek to position<br />
+- <code>LOAD_VIDEO</code> - Load new video<br />
+- <code>VIDEO_STATE</code> - Broadcast current state to clients</p>
+<p><strong>Features:</strong><br />
+- <code>CHAT_MESSAGE</code> - Send chat message<br />
+- <code>REACTION</code> - Send emoji reaction<br />
+- <code>ADD_TO_PLAYLIST</code> - Add video to queue<br />
+- <code>REMOVE_FROM_PLAYLIST</code> - Remove from queue<br />
+- <code>PLAY_FROM_PLAYLIST</code> - Play specific playlist item</p>
+<h3>Connection Flow</h3>
+<div class="codehilite"><pre><span></span><code><span class="n">Client</span><span class="w">                           </span><span class="n">Server</span>
+<span class="w">  </span><span class="o">|</span><span class="w">                                 </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="n">Connect</span><span class="w"> </span><span class="p">(</span><span class="n">Socket</span><span class="p">.</span><span class="n">io</span><span class="w"> </span><span class="n">handshake</span><span class="p">)</span><span class="w">   </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|--------------------------------&gt;|</span>
+<span class="w">  </span><span class="o">|</span><span class="w">                                 </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|&lt;--------------------------------|</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="n">Connection</span><span class="w"> </span><span class="n">ACK</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="n">socket</span><span class="p">.</span><span class="n">id</span><span class="w">      </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span><span class="w">                                 </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="n">PING</span><span class="w"> </span><span class="p">(</span><span class="n">for</span><span class="w"> </span><span class="n">clock</span><span class="w"> </span><span class="n">offset</span><span class="p">)</span><span class="w">         </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|--------------------------------&gt;|</span>
+<span class="w">  </span><span class="o">|</span><span class="w">                                 </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|&lt;--------------------------------|</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="n">PONG</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">serverTime</span><span class="w"> </span><span class="p">}</span><span class="w">             </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span><span class="w">                                 </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="p">(</span><span class="n">Calculate</span><span class="w"> </span><span class="n">offset</span><span class="p">)</span><span class="w">              </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span><span class="w">                                 </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="n">CREATE_ROOM</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">code</span><span class="p">,</span><span class="w"> </span><span class="n">username</span><span class="w"> </span><span class="p">}</span><span class="w">  </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|--------------------------------&gt;|</span>
+<span class="w">  </span><span class="o">|</span><span class="w">                                 </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span><span class="w">                          </span><span class="p">(</span><span class="n">Create</span><span class="w"> </span><span class="n">room</span><span class="p">)</span>
+<span class="w">  </span><span class="o">|</span><span class="w">                          </span><span class="p">(</span><span class="n">Add</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">Socket</span><span class="p">.</span><span class="n">io</span><span class="w"> </span><span class="n">room</span><span class="p">)</span>
+<span class="w">  </span><span class="o">|</span><span class="w">                                 </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|&lt;--------------------------------|</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="n">ROOM_STATE</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="n">entire</span><span class="w"> </span><span class="n">room</span><span class="w"> </span><span class="n">state</span><span class="w"> </span><span class="p">}</span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span><span class="w">                                 </span><span class="o">|</span>
+<span class="w">  </span><span class="o">|</span><span class="w"> </span><span class="n">Ready</span><span class="o">!</span><span class="w"> </span><span class="err">🎉</span><span class="w">                       </span><span class="o">|</span>
+</code></pre></div>
+
+<h3>Reconnection Handling</h3>
+<p><strong>Socket.io handles this automatically:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">socket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">io</span><span class="p">(</span><span class="nx">url</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">reconnection</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">reconnectionDelay</span><span class="o">:</span><span class="w"> </span><span class="mf">1000</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">reconnectionAttempts</span><span class="o">:</span><span class="w"> </span><span class="mf">5</span>
+<span class="p">});</span>
+
+<span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'disconnect'</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'Disconnected - will retry...'</span><span class="p">);</span>
+<span class="p">});</span>
+
+<span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'reconnect'</span><span class="p">,</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="s1">'Reconnected!'</span><span class="p">);</span>
+<span class="w">  </span><span class="c1">// Re-join room, sync state</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p><strong>What happens on reconnect:</strong><br />
+1. Socket.io reconnects automatically<br />
+2. Server gives you new socket.id<br />
+3. Client re-joins room (emits JOIN_ROOM again)<br />
+4. Server sends fresh ROOM_STATE<br />
+5. Drift correction catches you up to current position</p>
+<hr />
+<h2>Handling Edge Cases</h2>
+<h3>Echo Loops (The Hardest Bug)</h3>
+<p><strong>The Problem:</strong></p>
+<div class="codehilite"><pre><span></span><code>You click play
+  ↓
+Send PLAY to server
+  ↓
+Server broadcasts VIDEO_STATE
+  ↓
+You receive VIDEO_STATE (play)
+  ↓
+Trigger handleRemotePlay()
+  ↓
+Video plays... and onStateChange fires!
+  ↓
+Detect "user action" (wrong!)
+  ↓
+Send PLAY to server (again!)
+  ↓
+INFINITE LOOP 🔥
+</code></pre></div>
+
+<p><strong>The Fix: isRemoteUpdate flag</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">isRemoteUpdateRef</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useRef</span><span class="p">(</span><span class="kc">false</span><span class="p">);</span>
+
+<span class="c1">// When server tells us to play</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">handleRemotePlay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">isRemoteUpdateRef</span><span class="p">.</span><span class="nx">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span><span class="w">  </span><span class="c1">// Flag it!</span>
+<span class="w">  </span><span class="nx">player</span><span class="p">.</span><span class="nx">playVideo</span><span class="p">();</span>
+<span class="p">};</span>
+
+<span class="c1">// When video state changes (YouTube IFrame API event)</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">onStateChange</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">event</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">isRemoteUpdateRef</span><span class="p">.</span><span class="nx">current</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// This was US responding to server, not user action</span>
+<span class="w">    </span><span class="nx">isRemoteUpdateRef</span><span class="p">.</span><span class="nx">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">false</span><span class="p">;</span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span><span class="w"> </span><span class="c1">// Don't send back to server!</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// User actually clicked play/pause</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">event</span><span class="p">.</span><span class="nx">data</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="nx">YT</span><span class="p">.</span><span class="nx">PlayerState</span><span class="p">.</span><span class="nx">PLAYING</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">sendPlay</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<h3>Pause-Drag-Play Seeking</h3>
+<p><strong>User flow:</strong><br />
+1. Video is playing<br />
+2. User clicks pause<br />
+3. User drags seek bar to 2:00<br />
+4. User clicks play</p>
+<p><strong>What we need:</strong><br />
+- Video should play at 2:00 (where they dragged)<br />
+- Everyone else should see it play at 2:00</p>
+<p><strong>How we do it:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">handleLocalPlay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">currentPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">playerRef</span><span class="p">.</span><span class="nx">current</span><span class="o">?</span><span class="p">.</span><span class="nx">getCurrentTime</span><span class="p">()</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span>
+
+<span class="w">  </span><span class="c1">// Send CURRENT position (not server's old position)</span>
+<span class="w">  </span><span class="nx">sendPlay</span><span class="p">(</span><span class="nx">currentPosition</span><span class="p">,</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="p">);</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p>Server uses the position we send:</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'PLAY'</span><span class="p">,</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">position</span><span class="p">,</span><span class="w"> </span><span class="nx">version</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">room</span><span class="p">.</span><span class="nx">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">position</span><span class="p">;</span><span class="w"> </span><span class="c1">// Use position from client!</span>
+<span class="w">  </span><span class="nx">room</span><span class="p">.</span><span class="nx">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'playing'</span><span class="p">;</span>
+<span class="w">  </span><span class="c1">// ...</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<h3>Search Debouncing</h3>
+<p><strong>Without debouncing:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="nx">User</span><span class="w"> </span><span class="nx">types</span><span class="p">:</span><span class="w"> </span><span class="s">"A"</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">API</span><span class="w"> </span><span class="nx">call</span>
+<span class="nx">User</span><span class="w"> </span><span class="nx">types</span><span class="p">:</span><span class="w"> </span><span class="s">"v"</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">API</span><span class="w"> </span><span class="nx">call</span><span class="w">  </span>
+<span class="nx">User</span><span class="w"> </span><span class="nx">types</span><span class="p">:</span><span class="w"> </span><span class="s">"e"</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">API</span><span class="w"> </span><span class="nx">call</span>
+<span class="nx">User</span><span class="w"> </span><span class="nx">types</span><span class="p">:</span><span class="w"> </span><span class="s">"n"</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">API</span><span class="w"> </span><span class="nx">call</span>
+<span class="nx">User</span><span class="w"> </span><span class="nx">types</span><span class="p">:</span><span class="w"> </span><span class="s">"g"</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">API</span><span class="w"> </span><span class="nx">call</span>
+<span class="nx">User</span><span class="w"> </span><span class="nx">types</span><span class="p">:</span><span class="w"> </span><span class="s">"e"</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">API</span><span class="w"> </span><span class="nx">call</span>
+<span class="nx">User</span><span class="w"> </span><span class="nx">types</span><span class="p">:</span><span class="w"> </span><span class="s">"r"</span><span class="w"> </span><span class="err">→</span><span class="w"> </span><span class="nx">API</span><span class="w"> </span><span class="nx">call</span>
+
+<span class="nx">Result</span><span class="p">:</span><span class="w"> </span><span class="mi">7</span><span class="w"> </span><span class="nx">API</span><span class="w"> </span><span class="nx">calls</span><span class="p">,</span><span class="w"> </span><span class="mi">6</span><span class="w"> </span><span class="nx">of</span><span class="w"> </span><span class="nx">them</span><span class="w"> </span><span class="nx">useless</span><span class="p">!</span>
+</code></pre></div>
+
+<p><strong>With debouncing (500ms):</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="nx">useEffect</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">timeoutId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">setTimeout</span><span class="p">(</span><span class="k">async</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="c1">// Only fires 500ms after user STOPS typing</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">results</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">searchMovies</span><span class="p">(</span><span class="nx">searchQuery</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">setSearchResults</span><span class="p">(</span><span class="nx">results</span><span class="p">);</span>
+<span class="w">  </span><span class="p">},</span><span class="w"> </span><span class="mf">500</span><span class="p">);</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">clearTimeout</span><span class="p">(</span><span class="nx">timeoutId</span><span class="p">);</span><span class="w"> </span><span class="c1">// Cancel if user keeps typing</span>
+<span class="p">},</span><span class="w"> </span><span class="p">[</span><span class="nx">searchQuery</span><span class="p">]);</span>
+</code></pre></div>
+
+<p><strong>Result:</strong> 1 API call for "Avenger" after user finishes typing!</p>
+<h3>Multiple Users Clicking Play Simultaneously</h3>
+<p><strong>Scenario:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="mf">10</span><span class="p">:</span><span class="mf">00</span><span class="p">:</span><span class="mf">00.000</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">User</span><span class="w"> </span><span class="n">A</span><span class="w"> </span><span class="n">clicks</span><span class="w"> </span><span class="n">play</span><span class="w"> </span><span class="p">(</span><span class="n">version</span><span class="w"> </span><span class="mf">50</span><span class="p">)</span>
+<span class="mf">10</span><span class="p">:</span><span class="mf">00</span><span class="p">:</span><span class="mf">00.001</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">User</span><span class="w"> </span><span class="n">B</span><span class="w"> </span><span class="n">clicks</span><span class="w"> </span><span class="n">play</span><span class="w"> </span><span class="p">(</span><span class="n">version</span><span class="w"> </span><span class="mf">50</span><span class="p">)</span>
+</code></pre></div>
+
+<p>Both send PLAY with version 50. Who wins?</p>
+<p><strong>Server handles it:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// User A's command arrives first (by 1ms)</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">command</span><span class="p">.</span><span class="nx">version</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">// Now version is 51</span>
+<span class="w">  </span><span class="c1">// Process command</span>
+<span class="p">}</span>
+
+<span class="c1">// User B's command arrives 1ms later</span>
+<span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">command</span><span class="p">.</span><span class="nx">version</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// FALSE! (50 !== 51)</span>
+<span class="w">  </span><span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'ERROR'</span><span class="p">,</span><span class="w"> </span><span class="s1">'State changed'</span><span class="p">);</span>
+<span class="w">  </span><span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Result:</strong> User A wins. User B gets error but then receives VIDEO_STATE from User A's action. Everything syncs correctly.</p>
+<hr />
+<h2>Code Walkthrough</h2>
+<p>Let me explain the most important files and what they do.</p>
+<h3>1. <code>client/src/App.jsx</code> - Entry Point</h3>
+<p><strong>What it does:</strong><br />
+- Creates Socket.io connection<br />
+- Sets up React Router (Lobby vs Room pages)<br />
+- Passes socket to all components</p>
+<p><strong>Key code:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">SOCKET_URL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">import</span><span class="p">.</span><span class="nx">meta</span><span class="p">.</span><span class="nx">env</span><span class="p">.</span><span class="nx">VITE_SERVER_URL</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">location</span><span class="p">.</span><span class="nx">origin</span><span class="p">;</span>
+
+<span class="kd">const</span><span class="w"> </span><span class="nx">socket</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">io</span><span class="p">(</span><span class="nx">SOCKET_URL</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">reconnection</span><span class="o">:</span><span class="w"> </span><span class="kc">true</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">reconnectionDelay</span><span class="o">:</span><span class="w"> </span><span class="mf">1000</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">reconnectionAttempts</span><span class="o">:</span><span class="w"> </span><span class="mf">5</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p><strong>Why <code>window.location.origin</code>?</strong><br />
+- Works with ngrok (tunnel URL)<br />
+- Works in production (deployed URL)<br />
+- Vite proxy handles routing to backend</p>
+<h3>2. <code>client/src/hooks/useRoomSocket.js</code> - Socket Commands</h3>
+<p><strong>What it does:</strong><br />
+- Handles all socket communication<br />
+- Provides clean API to components (sendPlay, sendPause, etc.)<br />
+- Manages room state from server</p>
+<p><strong>Structure:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">useRoomSocket</span><span class="p">(</span><span class="nx">socket</span><span class="p">,</span><span class="w"> </span><span class="nx">roomCode</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">roomState</span><span class="p">,</span><span class="w"> </span><span class="nx">setRoomState</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">(</span><span class="kc">null</span><span class="p">);</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="p">[</span><span class="nx">participants</span><span class="p">,</span><span class="w"> </span><span class="nx">setParticipants</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">useState</span><span class="p">([]);</span>
+
+<span class="w">  </span><span class="c1">// Listen for server events</span>
+<span class="w">  </span><span class="nx">useEffect</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'VIDEO_STATE'</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">state</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">setRoomState</span><span class="p">(</span><span class="nx">state</span><span class="p">);</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="s1">'USER_JOINED'</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="nx">data</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">setParticipants</span><span class="p">(</span><span class="nx">prev</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">[...</span><span class="nx">prev</span><span class="p">,</span><span class="w"> </span><span class="nx">data</span><span class="p">.</span><span class="nx">user</span><span class="p">]);</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="c1">// ... more listeners</span>
+<span class="w">  </span><span class="p">},</span><span class="w"> </span><span class="p">[</span><span class="nx">socket</span><span class="p">]);</span>
+
+<span class="w">  </span><span class="c1">// Provide commands</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">sendPlay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">position</span><span class="p">,</span><span class="w"> </span><span class="nx">version</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'PLAY'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">code</span><span class="o">:</span><span class="w"> </span><span class="nx">roomCode</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">userId</span><span class="o">:</span><span class="w"> </span><span class="nx">localStorage</span><span class="p">.</span><span class="nx">getItem</span><span class="p">(</span><span class="s1">'clientId'</span><span class="p">),</span>
+<span class="w">      </span><span class="nx">position</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">version</span>
+<span class="w">    </span><span class="p">});</span>
+<span class="w">  </span><span class="p">};</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">sendPlay</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">sendPause</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">sendSeek</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">roomState</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">participants</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Why this pattern?</strong><br />
+- Components don't need to know about sockets<br />
+- All socket logic in one place<br />
+- Easy to add new commands</p>
+<h3>3. <code>client/src/hooks/useSyncedPlayer.js</code> - Sync Logic</h3>
+<p><strong>What it does:</strong><br />
+- Responds to roomState changes (play, pause, seek)<br />
+- Runs drift correction every 3 seconds<br />
+- Prevents echo loops with isRemoteUpdate flag</p>
+<p><strong>Key parts:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// Respond to server state changes</span>
+<span class="nx">useEffect</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">roomState</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="o">!</span><span class="nx">playerRef</span><span class="p">.</span><span class="nx">current</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">roomState</span><span class="p">.</span><span class="nx">status</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">'playing'</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">isRemoteUpdateRef</span><span class="p">.</span><span class="nx">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">playerRef</span><span class="p">.</span><span class="nx">current</span><span class="p">.</span><span class="nx">playVideo</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">roomState</span><span class="p">.</span><span class="nx">status</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="s1">'paused'</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">isRemoteUpdateRef</span><span class="p">.</span><span class="nx">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">    </span><span class="nx">playerRef</span><span class="p">.</span><span class="nx">current</span><span class="p">.</span><span class="nx">pauseVideo</span><span class="p">();</span>
+<span class="w">  </span><span class="p">}</span>
+<span class="p">},</span><span class="w"> </span><span class="p">[</span><span class="nx">roomState</span><span class="p">]);</span>
+
+<span class="c1">// Drift correction</span>
+<span class="nx">useEffect</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">interval</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">setInterval</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">roomState</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="nx">roomState</span><span class="p">.</span><span class="nx">status</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="s1">'playing'</span><span class="p">)</span><span class="w"> </span><span class="k">return</span><span class="p">;</span>
+
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">serverTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">calculateCurrentPosition</span><span class="p">(</span><span class="nx">roomState</span><span class="p">);</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">myTime</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">playerRef</span><span class="p">.</span><span class="nx">current</span><span class="o">?</span><span class="p">.</span><span class="nx">getCurrentTime</span><span class="p">()</span><span class="w"> </span><span class="o">||</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">abs</span><span class="p">(</span><span class="nx">serverTime</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="nx">myTime</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">2</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">isRemoteUpdateRef</span><span class="p">.</span><span class="nx">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kc">true</span><span class="p">;</span>
+<span class="w">      </span><span class="nx">playerRef</span><span class="p">.</span><span class="nx">current</span><span class="p">.</span><span class="nx">seekTo</span><span class="p">(</span><span class="nx">serverTime</span><span class="p">);</span>
+<span class="w">    </span><span class="p">}</span>
+<span class="w">  </span><span class="p">},</span><span class="w"> </span><span class="mf">3000</span><span class="p">);</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="nx">clearInterval</span><span class="p">(</span><span class="nx">interval</span><span class="p">);</span>
+<span class="p">},</span><span class="w"> </span><span class="p">[</span><span class="nx">roomState</span><span class="p">]);</span>
+</code></pre></div>
+
+<h3>4. <code>server/src/socket.js</code> - Event Handlers</h3>
+<p><strong>What it does:</strong><br />
+- Listens for client commands<br />
+- Updates room state<br />
+- Broadcasts changes to all clients</p>
+<p><strong>Example: PLAY event</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="nx">socket</span><span class="p">.</span><span class="nx">on</span><span class="p">(</span><span class="nx">EVENTS</span><span class="p">.</span><span class="nx">PLAY</span><span class="p">,</span><span class="w"> </span><span class="p">({</span><span class="w"> </span><span class="nx">code</span><span class="p">,</span><span class="w"> </span><span class="nx">userId</span><span class="p">,</span><span class="w"> </span><span class="nx">position</span><span class="p">,</span><span class="w"> </span><span class="nx">version</span><span class="w"> </span><span class="p">})</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">room</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">rooms</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">code</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">room</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'ERROR'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="s1">'Room not found'</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Version check (prevent conflicts)</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">version</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'ERROR'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="s1">'State changed'</span><span class="w"> </span><span class="p">});</span>
+<span class="w">    </span><span class="k">return</span><span class="p">;</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Update room state</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">playPosition</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">position</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="kc">undefined</span><span class="w"> </span>
+<span class="w">    </span><span class="o">?</span><span class="w"> </span><span class="nx">position</span><span class="w"> </span>
+<span class="w">    </span><span class="o">:</span><span class="w"> </span><span class="nx">calculateCurrentPosition</span><span class="p">(</span><span class="nx">room</span><span class="p">);</span>
+
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">result</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">rooms</span><span class="p">.</span><span class="nx">updateVideoState</span><span class="p">(</span><span class="nx">code</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">'playing'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">position</span><span class="o">:</span><span class="w"> </span><span class="nx">playPosition</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">lastUpdate</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">()</span>
+<span class="w">  </span><span class="p">},</span><span class="w"> </span><span class="nx">version</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Broadcast to everyone</span>
+<span class="w">  </span><span class="nx">io</span><span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="nx">code</span><span class="p">).</span><span class="nx">emit</span><span class="p">(</span><span class="nx">EVENTS</span><span class="p">.</span><span class="nx">VIDEO_STATE</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">'playing'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">position</span><span class="o">:</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">position</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">version</span><span class="o">:</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">version</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">lastUpdate</span><span class="o">:</span><span class="w"> </span><span class="nx">result</span><span class="p">.</span><span class="nx">lastUpdate</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">});</span>
+</code></pre></div>
+
+<p><strong>Pattern:</strong><br />
+1. Get room<br />
+2. Validate version<br />
+3. Update state<br />
+4. Broadcast</p>
+<h3>5. <code>server/src/rooms.js</code> - Room Manager</h3>
+<p><strong>What it does:</strong><br />
+- Create/delete rooms<br />
+- Update room state with version control<br />
+- Calculate current video position</p>
+<p><strong>Key method:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="nx">updateVideoState</span><span class="p">(</span><span class="nx">code</span><span class="p">,</span><span class="w"> </span><span class="nx">updates</span><span class="p">,</span><span class="w"> </span><span class="nx">expectedVersion</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">room</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">this</span><span class="p">.</span><span class="nx">rooms</span><span class="p">.</span><span class="nx">get</span><span class="p">(</span><span class="nx">code</span><span class="p">);</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nx">room</span><span class="p">)</span><span class="w"> </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s1">'Room not found'</span><span class="p">);</span>
+
+<span class="w">  </span><span class="c1">// Version check</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">expectedVersion</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="kc">undefined</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="w"> </span><span class="o">!==</span><span class="w"> </span><span class="nx">expectedVersion</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="k">throw</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="ne">Error</span><span class="p">(</span><span class="s1">'Version mismatch'</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Apply updates</span>
+<span class="w">  </span><span class="nb">Object</span><span class="p">.</span><span class="nx">assign</span><span class="p">(</span><span class="nx">room</span><span class="p">,</span><span class="w"> </span><span class="nx">updates</span><span class="p">);</span>
+<span class="w">  </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="o">++</span><span class="p">;</span><span class="w"> </span><span class="c1">// Increment version</span>
+
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">room</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3>6. <code>client/src/components/VideoPlayer.jsx</code> - YouTube Player</h3>
+<p><strong>What it does:</strong><br />
+- Loads YouTube IFrame API<br />
+- Creates player instance<br />
+- Handles play/pause/seek from user clicks</p>
+<p><strong>YouTube IFrame API setup:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="nx">useEffect</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Load YouTube API script</span>
+<span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="nb">window</span><span class="p">.</span><span class="nx">YT</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">tag</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">document</span><span class="p">.</span><span class="nx">createElement</span><span class="p">(</span><span class="s1">'script'</span><span class="p">);</span>
+<span class="w">    </span><span class="nx">tag</span><span class="p">.</span><span class="nx">src</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'https://www.youtube.com/iframe_api'</span><span class="p">;</span>
+<span class="w">    </span><span class="nb">document</span><span class="p">.</span><span class="nx">body</span><span class="p">.</span><span class="nx">appendChild</span><span class="p">(</span><span class="nx">tag</span><span class="p">);</span>
+<span class="w">  </span><span class="p">}</span>
+
+<span class="w">  </span><span class="c1">// Create player when API ready</span>
+<span class="w">  </span><span class="nb">window</span><span class="p">.</span><span class="nx">onYouTubeIframeAPIReady</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="kd">const</span><span class="w"> </span><span class="nx">player</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ow">new</span><span class="w"> </span><span class="nb">window</span><span class="p">.</span><span class="nx">YT</span><span class="p">.</span><span class="nx">Player</span><span class="p">(</span><span class="s1">'youtube-player'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">      </span><span class="nx">height</span><span class="o">:</span><span class="w"> </span><span class="s1">'100%'</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">width</span><span class="o">:</span><span class="w"> </span><span class="s1">'100%'</span><span class="p">,</span>
+<span class="w">      </span><span class="nx">videoId</span><span class="o">:</span><span class="w"> </span><span class="nx">getVideoId</span><span class="p">(</span><span class="nx">currentVideo</span><span class="p">.</span><span class="nx">url</span><span class="p">),</span>
+<span class="w">      </span><span class="nx">events</span><span class="o">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nx">onStateChange</span><span class="o">:</span><span class="w"> </span><span class="nx">handleStateChange</span>
+<span class="w">      </span><span class="p">}</span>
+<span class="w">    </span><span class="p">});</span>
+
+<span class="w">    </span><span class="nx">playerRef</span><span class="p">.</span><span class="nx">current</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">player</span><span class="p">;</span>
+<span class="w">  </span><span class="p">};</span>
+<span class="p">},</span><span class="w"> </span><span class="p">[]);</span>
+</code></pre></div>
+
+<h3>7. <code>client/src/services/tmdb.js</code> - Movie Data</h3>
+<p><strong>What it does:</strong><br />
+- Fetch trending/popular movies<br />
+- Search movies by title<br />
+- Get movie details</p>
+<p><strong>Example:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="k">export</span><span class="w"> </span><span class="k">async</span><span class="w"> </span><span class="kd">function</span><span class="w"> </span><span class="nx">searchMovies</span><span class="p">(</span><span class="nx">query</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">response</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">fetch</span><span class="p">(</span>
+<span class="w">    </span><span class="sb">`https://api.themoviedb.org/3/search/movie?api_key=</span><span class="si">${</span><span class="nx">API_KEY</span><span class="si">}</span><span class="sb">&amp;query=</span><span class="si">${</span><span class="nx">query</span><span class="si">}</span><span class="sb">`</span>
+<span class="w">  </span><span class="p">);</span>
+<span class="w">  </span><span class="kd">const</span><span class="w"> </span><span class="nx">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">await</span><span class="w"> </span><span class="nx">response</span><span class="p">.</span><span class="nx">json</span><span class="p">();</span>
+<span class="w">  </span><span class="k">return</span><span class="w"> </span><span class="nx">data</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Why separate service file?</strong><br />
+- All API calls in one place<br />
+- Easy to swap TMDB for another API<br />
+- Components don't need to know API details</p>
+<hr />
+<h2>How Features Work</h2>
+<h3>Chat</h3>
+<p><strong>Flow:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="nx">You</span><span class="w"> </span><span class="k">type</span><span class="w"> </span><span class="nx">message</span>
+<span class="w">  </span><span class="err">↓</span>
+<span class="nx">sendMessage</span><span class="p">(</span><span class="err">'</span><span class="nx">Hello</span><span class="p">!</span><span class="err">'</span><span class="p">)</span>
+<span class="w">  </span><span class="err">↓</span>
+<span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="err">'</span><span class="nx">CHAT_MESSAGE</span><span class="err">'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">text</span><span class="p">:</span><span class="w"> </span><span class="err">'</span><span class="nx">Hello</span><span class="p">!</span><span class="err">'</span><span class="p">,</span><span class="w"> </span><span class="nx">username</span><span class="p">:</span><span class="w"> </span><span class="err">'</span><span class="nx">You</span><span class="err">'</span><span class="w"> </span><span class="p">})</span>
+<span class="w">  </span><span class="err">↓</span>
+<span class="nx">Server</span><span class="w"> </span><span class="nx">receives</span><span class="p">,</span><span class="w"> </span><span class="nx">adds</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">messages</span>
+<span class="w">  </span><span class="err">↓</span>
+<span class="nx">Server</span><span class="w"> </span><span class="nx">broadcasts</span><span class="w"> </span><span class="nx">to</span><span class="w"> </span><span class="nx">all</span><span class="p">:</span><span class="w"> </span><span class="nx">io</span><span class="p">.</span><span class="nx">to</span><span class="p">(</span><span class="nx">code</span><span class="p">).</span><span class="nx">emit</span><span class="p">(</span><span class="err">'</span><span class="nx">NEW_MESSAGE</span><span class="err">'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="o">...</span><span class="w"> </span><span class="p">})</span>
+<span class="w">  </span><span class="err">↓</span>
+<span class="nx">Everyone</span><span class="err">'</span><span class="nx">s</span><span class="w"> </span><span class="nx">Chat</span><span class="w"> </span><span class="nx">component</span><span class="w"> </span><span class="nx">receives</span><span class="w"> </span><span class="k">and</span><span class="w"> </span><span class="nx">displays</span>
+</code></pre></div>
+
+<p><strong>Auto-scroll:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="nx">useEffect</span><span class="p">(()</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">messagesEndRef</span><span class="p">.</span><span class="nx">current</span><span class="o">?</span><span class="p">.</span><span class="nx">scrollIntoView</span><span class="p">({</span>
+<span class="w">    </span><span class="nx">behavior</span><span class="o">:</span><span class="w"> </span><span class="s1">'smooth'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">block</span><span class="o">:</span><span class="w"> </span><span class="s1">'nearest'</span><span class="w">  </span><span class="c1">// Don't scroll the whole page!</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">},</span><span class="w"> </span><span class="p">[</span><span class="nx">messages</span><span class="p">]);</span>
+</code></pre></div>
+
+<h3>Reactions</h3>
+<p><strong>Flow:</strong></p>
+<div class="codehilite"><pre><span></span><code>You click 😂 emoji
+  ↓
+socket.emit('REACTION', { emoji: '😂' })
+  ↓
+Server broadcasts to all
+  ↓
+Everyone sees floating 😂 animation
+</code></pre></div>
+
+<p><strong>Animation:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// Add reaction to state with random position</span>
+<span class="kd">const</span><span class="w"> </span><span class="nx">reaction</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="nb">Date</span><span class="p">.</span><span class="nx">now</span><span class="p">(),</span>
+<span class="w">  </span><span class="nx">emoji</span><span class="o">:</span><span class="w"> </span><span class="s1">'😂'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">x</span><span class="o">:</span><span class="w"> </span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">100</span><span class="w">  </span><span class="c1">// Random horizontal position</span>
+<span class="p">};</span>
+
+<span class="c1">// CSS animation (float up and fade)</span>
+<span class="err">@</span><span class="nx">keyframes</span><span class="w"> </span><span class="kr">float</span><span class="o">-</span><span class="nx">up</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="mf">0</span><span class="o">%</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">transform</span><span class="o">:</span><span class="w"> </span><span class="nx">translateY</span><span class="p">(</span><span class="mf">0</span><span class="p">);</span><span class="w"> </span><span class="nx">opacity</span><span class="o">:</span><span class="w"> </span><span class="mf">1</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="w">  </span><span class="mf">100</span><span class="o">%</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">transform</span><span class="o">:</span><span class="w"> </span><span class="nx">translateY</span><span class="p">(</span><span class="o">-</span><span class="mf">200</span><span class="nx">px</span><span class="p">);</span><span class="w"> </span><span class="nx">opacity</span><span class="o">:</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span><span class="w"> </span><span class="p">}</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3>Playlist</h3>
+<p><strong>Data structure:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="nx">playlist</span><span class="o">:</span><span class="w"> </span><span class="p">[</span>
+<span class="w">  </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">id</span><span class="o">:</span><span class="w"> </span><span class="s1">'uuid-1'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">url</span><span class="o">:</span><span class="w"> </span><span class="s1">'youtube.com/watch?v=...'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">title</span><span class="o">:</span><span class="w"> </span><span class="s1">'Avengers: Endgame'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">thumbnail</span><span class="o">:</span><span class="w"> </span><span class="s1">'https://...'</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">addedBy</span><span class="o">:</span><span class="w"> </span><span class="s1">'Sajiv'</span>
+<span class="w">  </span><span class="p">},</span>
+<span class="w">  </span><span class="c1">// ...</span>
+<span class="p">]</span>
+</code></pre></div>
+
+<p><strong>Play from playlist:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="kd">const</span><span class="w"> </span><span class="nx">handlePlay</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="nx">video</span><span class="p">)</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'PLAY_FROM_PLAYLIST'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span>
+<span class="w">    </span><span class="nx">code</span><span class="o">:</span><span class="w"> </span><span class="nx">roomCode</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">video</span><span class="p">,</span>
+<span class="w">    </span><span class="nx">version</span><span class="o">:</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span>
+<span class="w">  </span><span class="p">});</span>
+<span class="p">};</span>
+</code></pre></div>
+
+<p>Server loads new video and sets status to 'playing':</p>
+<div class="codehilite"><pre><span></span><code><span class="nx">room</span><span class="p">.</span><span class="nx">currentVideo</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">video</span><span class="p">;</span>
+<span class="nx">room</span><span class="p">.</span><span class="nx">status</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'playing'</span><span class="p">;</span>
+<span class="nx">room</span><span class="p">.</span><span class="nx">position</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">0</span><span class="p">;</span>
+<span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="o">++</span><span class="p">;</span>
+</code></pre></div>
+
+<hr />
+<h2>Performance Considerations</h2>
+<h3>Why It's Fast</h3>
+<p><strong>Socket.io binary protocol:</strong><br />
+- WebSocket is TCP (reliable, ordered)<br />
+- Very low overhead (~2-4 bytes per message)<br />
+- Persistent connection (no HTTP handshake every time)</p>
+<p><strong>Event-driven architecture:</strong><br />
+- Node.js doesn't block on I/O<br />
+- Can handle thousands of concurrent connections<br />
+- Single thread, but non-blocking</p>
+<p><strong>Minimal data transfer:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// We only send this:</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="nx">status</span><span class="o">:</span><span class="w"> </span><span class="s1">'playing'</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">position</span><span class="o">:</span><span class="w"> </span><span class="mf">45.3</span><span class="p">,</span>
+<span class="w">  </span><span class="nx">version</span><span class="o">:</span><span class="w"> </span><span class="mf">123</span>
+<span class="p">}</span>
+
+<span class="c1">// Not this:</span>
+<span class="p">{</span>
+<span class="w">  </span><span class="nx">entire_video_file</span><span class="o">:</span><span class="w"> </span><span class="p">[...],</span>
+<span class="w">  </span><span class="nx">all_metadata</span><span class="o">:</span><span class="w"> </span><span class="p">{...},</span>
+<span class="w">  </span><span class="nx">every_participant</span><span class="o">:</span><span class="w"> </span><span class="p">[...]</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<h3>Latency Breakdown</h3>
+<p><strong>Typical command (Play button):</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="nv">User</span><span class="w"> </span><span class="nv">click</span><span class="w"> </span>→<span class="w"> </span><span class="nv">JS</span><span class="w"> </span><span class="nv">event</span><span class="w"> </span><span class="nv">handler</span>:<span class="w"> </span><span class="o">~</span><span class="mi">5</span><span class="o">-</span><span class="mi">10</span><span class="nv">ms</span>
+<span class="nv">Socket</span>.<span class="nv">emit</span><span class="ss">()</span><span class="w"> </span>→<span class="w"> </span><span class="nv">Network</span><span class="w"> </span><span class="k">send</span>:<span class="w"> </span><span class="o">~</span><span class="mi">5</span><span class="o">-</span><span class="mi">10</span><span class="nv">ms</span>
+<span class="nv">Network</span><span class="w"> </span>→<span class="w"> </span><span class="nv">Server</span><span class="w"> </span><span class="nv">receive</span>:<span class="w"> </span><span class="o">~</span><span class="mi">20</span><span class="o">-</span><span class="mi">100</span><span class="nv">ms</span><span class="w"> </span><span class="ss">(</span><span class="nv">internet</span><span class="ss">)</span>
+<span class="nv">Server</span><span class="w"> </span><span class="nv">process</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="nv">broadcast</span>:<span class="w"> </span><span class="o">~</span><span class="mi">5</span><span class="o">-</span><span class="mi">10</span><span class="nv">ms</span>
+<span class="nv">Network</span><span class="w"> </span>→<span class="w"> </span><span class="nv">Client</span><span class="w"> </span><span class="nv">receive</span>:<span class="w"> </span><span class="o">~</span><span class="mi">20</span><span class="o">-</span><span class="mi">100</span><span class="nv">ms</span><span class="w"> </span><span class="ss">(</span><span class="nv">internet</span><span class="ss">)</span>
+<span class="nv">Client</span><span class="w"> </span><span class="nv">render</span><span class="w"> </span><span class="nv">update</span>:<span class="w"> </span><span class="o">~</span><span class="mi">5</span><span class="o">-</span><span class="mi">10</span><span class="nv">ms</span>
+
+<span class="nv">Total</span>:<span class="w"> </span><span class="o">~</span><span class="mi">60</span><span class="o">-</span><span class="mi">240</span><span class="nv">ms</span><span class="w"> </span><span class="ss">(</span><span class="nv">most</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">it</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">internet</span><span class="ss">)</span>
+</code></pre></div>
+
+<p><strong>Why 250ms feels instant:</strong><br />
+- Human reaction time is ~200-300ms<br />
+- Anything under 250ms feels immediate<br />
+- Our drift correction allows up to 2s (very forgiving)</p>
+<h3>Bottlenecks</h3>
+<p><strong>Current bottlenecks:</strong><br />
+1. <strong>In-memory storage</strong> - Limited to one server instance<br />
+2. <strong>No persistence</strong> - Rooms lost on restart<br />
+3. <strong>Single server</strong> - Can't distribute load</p>
+<p><strong>How to scale to 100k users:</strong></p>
+<ol>
+<li>
+<p><strong>Redis for shared state:</strong><br />
+<code>Server 1 ──┐
+   Server 2 ──┼──&gt; Redis (central state)
+   Server 3 ──┘</code></p>
+</li>
+<li>
+<p><strong>Socket.io Redis adapter:</strong><br />
+<code>javascript
+   const redisAdapter = require('socket.io-redis');
+   io.adapter(redisAdapter({ host: 'localhost', port: 6379 }));</code><br />
+   Now broadcasts work across multiple servers!</p>
+</li>
+<li>
+<p><strong>Load balancer with sticky sessions:</strong><br />
+<code>nginx → Server 1 (handles room ABC)
+         → Server 2 (handles room XYZ)
+         → Server 3 (handles room PQR)</code></p>
+</li>
+</ol>
+<hr />
+<h2>Security Considerations</h2>
+<h3>What We DO Handle</h3>
+<p>✅ <strong>Input validation:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">username</span><span class="p">.</span><span class="nx">length</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mf">50</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'ERROR'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="s1">'Username too long'</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>✅ <strong>Room code validation:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="o">!</span><span class="sr">/^[A-Z0-9]{6}$/</span><span class="p">.</span><span class="nx">test</span><span class="p">(</span><span class="nx">code</span><span class="p">))</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="nx">socket</span><span class="p">.</span><span class="nx">emit</span><span class="p">(</span><span class="s1">'ERROR'</span><span class="p">,</span><span class="w"> </span><span class="p">{</span><span class="w"> </span><span class="nx">message</span><span class="o">:</span><span class="w"> </span><span class="s1">'Invalid room code'</span><span class="w"> </span><span class="p">});</span>
+<span class="w">  </span><span class="k">return</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>✅ <strong>XSS prevention</strong> (React escapes by default):</p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// Safe - React escapes HTML</span>
+<span class="o">&lt;</span><span class="nx">div</span><span class="o">&gt;</span><span class="p">{</span><span class="nx">message</span><span class="p">.</span><span class="nx">text</span><span class="p">}</span><span class="o">&lt;</span><span class="err">/div&gt;</span>
+
+<span class="c1">// Dangerous - would execute scripts</span>
+<span class="o">&lt;</span><span class="nx">div</span><span class="w"> </span><span class="nx">dangerouslySetInnerHTML</span><span class="o">=</span><span class="p">{{</span><span class="w"> </span><span class="nx">__html</span><span class="o">:</span><span class="w"> </span><span class="nx">message</span><span class="p">.</span><span class="nx">text</span><span class="w"> </span><span class="p">}}</span><span class="w"> </span><span class="o">/&gt;</span>
+</code></pre></div>
+
+<h3>What We DON'T Handle (Okay for Tech Club Demo)</h3>
+<p>❌ <strong>Authentication:</strong> Anyone can join any room with code<br />
+❌ <strong>Authorization:</strong> Anyone can control video (no host-only controls)<br />
+❌ <strong>Rate limiting:</strong> Could spam socket events<br />
+❌ <strong>HTTPS:</strong> Running on HTTP (okay for local/ngrok)</p>
+<p><strong>Production fixes:</strong><br />
+- Add user accounts (Firebase Auth, Auth0, etc.)<br />
+- Rate limiting (express-rate-limit)<br />
+- HTTPS (Let's Encrypt, Cloudflare)<br />
+- Host-only controls (check if user is host before allowing PLAY/PAUSE)</p>
+<hr />
+<h2>Why These Design Choices?</h2>
+<h3>Server-Authoritative State</h3>
+<p><strong>Alternatives considered:</strong><br />
+1. <strong>Peer-to-peer:</strong> Browsers sync directly<br />
+   - ❌ Conflict resolution is hard<br />
+   - ❌ No single source of truth</p>
+<ol start="2">
+<li>
+<p><strong>Elected leader:</strong> One client is "host"<br />
+   - ❌ What if host leaves?<br />
+   - ❌ Host could have slow internet</p>
+</li>
+<li>
+<p><strong>Server-authoritative</strong> (our choice)<br />
+   - ✅ Single source of truth<br />
+   - ✅ Conflict resolution is simple (version numbers)<br />
+   - ✅ Reliable (server has fast connection)</p>
+</li>
+</ol>
+<h3>Version Numbers for Concurrency</h3>
+<p><strong>Alternative: Timestamps</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">command</span><span class="p">.</span><span class="nx">timestamp</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">lastUpdate</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Latest wins</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p><strong>Problems:</strong><br />
+- ❌ Clock skew (different computers have different times)<br />
+- ❌ Can't detect "saw stale state"</p>
+<p><strong>Our solution: Version numbers</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nx">command</span><span class="p">.</span><span class="nx">version</span><span class="w"> </span><span class="o">===</span><span class="w"> </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="p">)</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// You saw latest state, proceed</span>
+<span class="w">  </span><span class="nx">room</span><span class="p">.</span><span class="nx">version</span><span class="o">++</span><span class="p">;</span>
+<span class="p">}</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="p">{</span>
+<span class="w">  </span><span class="c1">// Stale! Reject</span>
+<span class="p">}</span>
+</code></pre></div>
+
+<p>✅ No clock dependency<br />
+✅ Explicit "you saw version X" semantics<br />
+✅ Easy to debug</p>
+<h3>Drift Correction Every 3 Seconds</h3>
+<p><strong>Why not more frequent?</strong><br />
+- More CPU usage<br />
+- More seeks (jarring for user)<br />
+- Network delays are ~100ms anyway</p>
+<p><strong>Why not less frequent?</strong><br />
+- Drift accumulates<br />
+- User notices after 5+ seconds</p>
+<p><strong>3 seconds is sweet spot:</strong><br />
+- Keeps sync tight<br />
+- Not noticeable to user<br />
+- Low overhead</p>
+<hr />
+<h2>Common Questions</h2>
+<h3>Why React instead of vanilla JavaScript?</h3>
+<p><strong>Vanilla JS approach:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// Every time state changes:</span>
+<span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'status'</span><span class="p">).</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newStatus</span><span class="p">;</span>
+<span class="nb">document</span><span class="p">.</span><span class="nx">getElementById</span><span class="p">(</span><span class="s1">'position'</span><span class="p">).</span><span class="nx">textContent</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nx">newPosition</span><span class="p">;</span>
+<span class="c1">// ... update 20 different DOM elements manually</span>
+</code></pre></div>
+
+<p><strong>React approach:</strong></p>
+<div class="codehilite"><pre><span></span><code><span class="c1">// Just update state</span>
+<span class="nx">setRoomState</span><span class="p">(</span><span class="nx">newState</span><span class="p">);</span>
+<span class="c1">// React automatically updates all DOM elements that depend on it</span>
+</code></pre></div>
+
+<p>React handles the complexity of "when state changes, what needs to update?"</p>
+<h3>Why Socket.io instead of plain WebSockets?</h3>
+<p><strong>WebSocket is the protocol. Socket.io is a library that uses WebSocket.</strong></p>
+<p>Socket.io adds:<br />
+- Auto-reconnection<br />
+- Rooms (grouping sockets)<br />
+- Fallback to HTTP long-polling<br />
+- Event-based API (emit/on instead of send/onmessage)</p>
+<h3>Could you use WebRTC instead?</h3>
+<p><strong>WebRTC:</strong> Peer-to-peer video/audio streaming</p>
+<p><strong>Our use case:</strong> Sync control commands, not streaming video</p>
+<p><strong>Why we don't use WebRTC:</strong><br />
+- YouTube already streams the video (via their CDN)<br />
+- We just need to sync play/pause commands<br />
+- Socket.io is simpler for command messages</p>
+<p><strong>When you WOULD use WebRTC:</strong><br />
+- Video calling (Zoom)<br />
+- Screen sharing<br />
+- Streaming your own webcam</p>
+<h3>Why not just use YouTube's "watch together" feature?</h3>
+<p><strong>Good question!</strong> </p>
+<p>This project is about:<br />
+1. <strong>Learning:</strong> Understanding real-time sync, WebSockets, state management<br />
+2. <strong>Customization:</strong> Adding features YouTube doesn't have (reactions, playlist, etc.)<br />
+3. <strong>Control:</strong> You own the code, can modify anything</p>
+<p>Plus, YouTube doesn't have a "watch together" API we can use. Their feature is closed.</p>
+<h3>How would you add video calling?</h3>
+<p><strong>Current:</strong> Everyone watches same YouTube video in sync</p>
+<p><strong>Add video calling:</strong> Everyone sees each other's faces</p>
+<p><strong>Tech needed:</strong><br />
+1. <strong>WebRTC</strong> for peer-to-peer video streams<br />
+2. <strong>STUN/TURN servers</strong> for NAT traversal<br />
+3. More complex UI (video tiles + main video)</p>
+<p><strong>Libraries:</strong><br />
+- simple-peer (WebRTC wrapper)<br />
+- mediasoup (media server for scaling)</p>
+<hr />
+<h2>What You Built</h2>
+<p>This isn't just a "tutorial project". You built:</p>
+<p>✅ <strong>Real-time collaborative application</strong> with complex state management<br />
+✅ <strong>Server-authoritative architecture</strong> with version control<br />
+✅ <strong>Drift correction algorithm</strong> for staying in sync<br />
+✅ <strong>WebSocket communication</strong> with Socket.io<br />
+✅ <strong>React hooks</strong> for separating logic from UI<br />
+✅ <strong>External API integration</strong> (TMDB, YouTube)<br />
+✅ <strong>Responsive UI</strong> with Tailwind CSS<br />
+✅ <strong>Conflict resolution</strong> for concurrent updates<br />
+✅ <strong>Clock offset calibration</strong> for accurate timing  </p>
+<p><strong>Most importantly:</strong> You understand WHY you made each choice, not just HOW to copy code.</p>
+<hr />
+<h2>Next Steps (If You Wanted to Extend It)</h2>
+<h3>Feature Ideas</h3>
+<ol>
+<li><strong>Rooms persistence</strong> - Save rooms to database, resume later</li>
+<li><strong>User accounts</strong> - Login, save favorite rooms</li>
+<li><strong>Host controls</strong> - Only host can play/pause (others vote)</li>
+<li><strong>Screen sharing</strong> - Show browser tab, not just YouTube</li>
+<li><strong>Spotify integration</strong> - Listen to music together</li>
+<li><strong>Mobile app</strong> - React Native version</li>
+</ol>
+<h3>Scaling Ideas</h3>
+<ol>
+<li><strong>Redis for state</strong> - Share state across multiple servers</li>
+<li><strong>PostgreSQL for persistence</strong> - Save rooms, users, history</li>
+<li><strong>CDN for assets</strong> - Faster image/script loading</li>
+<li><strong>Monitoring</strong> - Grafana dashboard for latency/errors</li>
+<li><strong>Auto-scaling</strong> - Spin up more servers on high traffic</li>
+</ol>
+<h3>Architecture Improvements</h3>
+<ol>
+<li><strong>TypeScript</strong> - Type safety for all socket events</li>
+<li><strong>Unit tests</strong> - Test sync logic, room manager</li>
+<li><strong>E2E tests</strong> - Cypress tests for user flows</li>
+<li><strong>Error boundaries</strong> - Better error handling in React</li>
+<li><strong>Logging</strong> - Winston for structured server logs</li>
+</ol>
+<hr />
+<p><strong>You built something real. Now you understand it deeply.</strong></p>
+<p>This is what separates someone who can code from someone who can architect systems.</p>
+<p>Good luck explaining this project - you know it inside out now! 🚀</p>
+    <script>
+        // Optional: Auto-open print dialog when page loads
+        // window.onload = function() {
+        //     window.print();
+        // };
+    </script>
+</body>
+</html>
