@@ -9,10 +9,10 @@ A real-time synchronized video streaming application built with React and Node.j
 ## Features
 
 ### 🎥 Real-Time Video Synchronization
-- Sub-250ms play/pause propagation (P95)
 - Automatic drift correction every 3 seconds
-- Clock offset calibration for accurate sync
 - Server-authoritative state management
+- Version control for conflict resolution
+- Handles network delays and buffering
 
 ### 🎬 Movie Discovery
 - Browse 1000s of movies via TMDB API
@@ -94,64 +94,28 @@ Open http://localhost:5173
 
 ## Architecture
 
-### Synchronization Algorithm
+### How Synchronization Works
 
-**Clock Offset Estimation:**
-```javascript
-// NTP-like ping/pong for time sync
-1. Client pings server 5 times
-2. Measures RTT for each ping
-3. Uses lowest RTT (least network jitter)
-4. Calculates: offset = serverTime - (clientTime + RTT/2)
-```
-
-**Drift Correction:**
-```javascript
-// Runs every 3 seconds
-drift = |actualPosition - expectedPosition|
-
-if (drift > 500ms) → Hard seek
-else if (drift > 200ms) → Playback rate nudge (1.05x/0.95x)
-else → No correction needed
-```
+**Server-Authoritative State:**
+- Server maintains the single source of truth
+- All clients receive updates from the server
+- Prevents conflicts when multiple users act simultaneously
 
 **Version Control:**
-- Every state change increments version number
-- Clients send version with commands
-- Server rejects stale updates
-- Prevents conflicts from concurrent actions
+- Each state change increments a version number
+- Server rejects outdated commands
+- Ensures only one action wins when conflicts occur
 
-### State Management
+**Drift Correction:**
+- Every 3 seconds, clients check their position against the server
+- If off by more than 2 seconds, video jumps back to correct position
+- Handles network delays and buffering issues automatically
 
-```javascript
-{
-  videoId: string,
-  status: 'playing' | 'paused',
-  position: number,          // Position at last update
-  updatedAt: timestamp,      // When position was recorded
-  version: number,           // Increments on every change
-  users: Map,
-  playlist: [],
-  chat: []
-}
-```
-
-**Server-authoritative:** Single source of truth prevents conflicts.
-
-## Performance
-
-Tested with 10 concurrent users:
-
-| Metric | Target | Achieved |
-|--------|--------|----------|
-| P95 Latency | ≤250ms | 25-45ms ✅ |
-| Drift After Correction | ≤500ms | <200ms ✅ |
-| Concurrent Users | 10+ | 10+ ✅ |
-
-Run load test:
-```bash
-cd scripts && npm run loadtest
-```
+**Room State:**
+- Current video and playback status (playing/paused)
+- Position and timestamp of last update
+- List of participants
+- Playlist and chat messages
 
 ## Project Structure
 
@@ -173,18 +137,18 @@ watch-party/
 └── docs/                # Additional documentation
 ```
 
-## Scaling
+## Scaling to Production
 
-**Current:** In-memory state, single server
+**Current Setup:**
+- In-memory state on single server
+- Works great for demos and small groups
 
-**Production path:**
-1. **Redis** - Shared state across multiple servers
-2. **Socket.io Redis Adapter** - Cross-server broadcasts
-3. **Load Balancer** - Distribute connections
-4. **PostgreSQL** - User accounts, history
-5. **CDN** - Static assets
-
-Estimated capacity: **100,000+ concurrent users**
+**To Scale for Production:**
+1. Add Redis for shared state across multiple servers
+2. Use Socket.io Redis adapter for cross-server communication
+3. Add load balancer to distribute user connections
+4. Add database (PostgreSQL) for user accounts and history
+5. Use CDN for faster asset loading
 
 ## Known Limitations
 
