@@ -21,7 +21,7 @@ function Playlist({ socket, roomCode, playlist, currentVideoId }) {
 
   return (
     <div className="bg-gray-800 rounded-lg p-4">
-      <h2 className="text-xl font-bold mb-4">Playlist ({playlist.length})</h2>
+      <h2 className="text-xl font-bold mb-4">🎬 Playlist ({playlist.length})</h2>
 
       {playlist.length === 0 ? (
         <p className="text-gray-500 text-sm text-center py-4">

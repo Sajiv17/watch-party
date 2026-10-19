@@ -8,7 +8,6 @@ import MovieBrowser from './MovieBrowser';
 import Chat from './Chat';
 import Reactions from './Reactions';
 import Playlist from './Playlist';
-import Polls from './Polls';
 
 // Room page: the main watch party interface
 function Room({ socket }) {
@@ -144,7 +143,7 @@ function Room({ socket }) {
       </div>
 
       {/* Main content */}
-      <div className="max-w-7xl mx-auto p-4">
+      <div className="max-w-7xl mx-auto p-4 pb-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Left column: Video + Reactions + Chat + Playlist */}
           <div className="lg:col-span-3 space-y-4">
@@ -253,13 +252,6 @@ function Room({ socket }) {
               </div>
             </div>
 
-            {/* Polls */}
-            <Polls
-              socket={socket}
-              roomCode={code}
-              polls={room.polls || []}
-            />
-
             {/* Movie Browser */}
             <MovieBrowser
               onPlayTrailer={handlePlayTrailer}
@@ -268,6 +260,9 @@ function Room({ socket }) {
           </div>
         </div>
       </div>
+
+      {/* Footer spacer for better bottom spacing */}
+      <div className="h-8"></div>
     </div>
   );
 }

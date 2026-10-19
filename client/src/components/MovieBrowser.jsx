@@ -251,18 +251,18 @@ function MovieBrowser({ onPlayTrailer, onAddToPlaylist }) {
                   {movie.release_date?.substring(0, 4) || 'N/A'} • ⭐ {movie.vote_average?.toFixed(1) || 'N/A'}
                 </p>
 
-                <div className="flex gap-1 mt-2">
+                <div className="flex flex-col gap-1 mt-2">
                   <button
                     onClick={() => handlePlayTrailer(movie)}
-                    className="flex-1 bg-purple-600 hover:bg-purple-700 text-xs py-1 rounded"
+                    className="w-full bg-purple-600 hover:bg-purple-700 text-xs py-1.5 rounded font-medium"
                   >
                     Play Trailer
                   </button>
                   <button
                     onClick={() => onAddToPlaylist(movie)}
-                    className="flex-1 bg-gray-600 hover:bg-gray-500 text-xs py-1 rounded"
+                    className="w-full bg-green-600 hover:bg-green-700 text-xs py-1.5 rounded font-medium"
                   >
-                    Add to Playlist
+                    + Add to Playlist
                   </button>
                 </div>
               </div>

@@ -41,8 +41,8 @@ function Chat({ socket, roomCode, messages }) {
   };
 
   return (
-    <div className="bg-gray-800 rounded-lg p-4 flex flex-col h-96">
-      <h2 className="text-xl font-bold mb-4">Chat</h2>
+    <div className="bg-gray-800 rounded-lg p-4 flex flex-col h-80">
+      <h2 className="text-xl font-bold mb-4">💬 Chat</h2>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto mb-4 space-y-2">
