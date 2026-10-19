@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
-import Fuse from 'fuse.js';
 import {
   getPopularMovies,
   getTopRatedMovies,
   getNowPlayingMovies,
+  searchMovies,
   getGenres,
   discoverMovies,
   getMovieVideos,
@@ -29,6 +29,7 @@ function MovieBrowser({ onPlayTrailer, onAddToPlaylist }) {
   // Search
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Fetch genres on mount
   useEffect(() => {
@@ -88,25 +89,36 @@ function MovieBrowser({ onPlayTrailer, onAddToPlaylist }) {
     fetchMovies();
   }, [category, selectedGenre, selectedYear, minRating]);
 
-  // Fuzzy search with Fuse.js
+  // Real TMDB search (not fuzzy search on local movies)
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
+      setIsSearching(false);
       return;
     }
 
-    const fuse = new Fuse(movies, {
-      keys: ['title', 'overview'],
-      threshold: 0.3, // 0 = exact match, 1 = match anything
-      includeScore: true
-    });
+    // Debounce search - wait 500ms after user stops typing
+    const timeoutId = setTimeout(async () => {
+      setIsSearching(true);
+      setError('');
 
-    const results = fuse.search(searchQuery);
-    setSearchResults(results.map(r => r.item));
-  }, [searchQuery, movies]);
+      try {
+        const data = await searchMovies(searchQuery);
+        setSearchResults(data.results || []);
+      } catch (err) {
+        setError('Search failed. Please try again.');
+        console.error('Search error:', err);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 500); // 500ms debounce
 
-  // Display search results if searching, otherwise show all movies
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // Display search results if searching, otherwise show category movies
   const displayMovies = searchQuery.trim() ? searchResults : movies;
+  const showLoading = searchQuery.trim() ? isSearching : loading;
 
   // Handle play trailer
   const handlePlayTrailer = async (movie) => {
@@ -134,7 +146,7 @@ function MovieBrowser({ onPlayTrailer, onAddToPlaylist }) {
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          placeholder="Search movies (fuzzy search)..."
+          placeholder="Search movies..."
           className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
         />
       </div>
@@ -222,12 +234,14 @@ function MovieBrowser({ onPlayTrailer, onAddToPlaylist }) {
       )}
 
       {/* Loading */}
-      {loading && (
-        <div className="text-center py-8 text-gray-400">Loading movies...</div>
+      {showLoading && (
+        <div className="text-center py-8 text-gray-400">
+          {searchQuery.trim() ? 'Searching...' : 'Loading movies...'}
+        </div>
       )}
 
       {/* Movies Grid */}
-      {!loading && (
+      {!showLoading && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {displayMovies.map(movie => (
             <div key={movie.id} className="bg-gray-700 rounded overflow-hidden">
@@ -271,9 +285,11 @@ function MovieBrowser({ onPlayTrailer, onAddToPlaylist }) {
         </div>
       )}
 
-      {!loading && displayMovies.length === 0 && (
+      {!showLoading && displayMovies.length === 0 && (
         <div className="text-center py-8 text-gray-400">
-          No movies found
+          {searchQuery.trim()
+            ? `No results for "${searchQuery}"`
+            : 'No movies found'}
         </div>
       )}
     </div>
