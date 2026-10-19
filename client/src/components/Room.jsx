@@ -215,6 +215,7 @@ function Room({ socket }) {
               roomCode={code}
               playlist={room.playlist || []}
               currentVideoId={room.videoId}
+              roomVersion={room.version}
             />
           </div>
 

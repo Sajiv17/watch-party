@@ -181,10 +181,11 @@ export function setupSocketHandlers(io) {
       const room = rooms.getRoom(code);
       if (!room) return;
 
+      // Load the video and START PLAYING automatically
       const result = rooms.updateVideoState(code, {
         videoId,
         position: 0,
-        status: 'paused'
+        status: 'playing'  // Changed from 'paused' to 'playing'
       }, version);
 
       if (!result.stale) {

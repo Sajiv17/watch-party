@@ -3,12 +3,12 @@ import { EVENTS } from '../utils/constants';
 /**
  * Playlist component - shared playlist with play next functionality
  */
-function Playlist({ socket, roomCode, playlist, currentVideoId }) {
+function Playlist({ socket, roomCode, playlist, currentVideoId, roomVersion }) {
   const handlePlayVideo = (videoId) => {
     socket.emit(EVENTS.PLAY_FROM_PLAYLIST, {
       code: roomCode,
       videoId,
-      version: Date.now() // This will be replaced with room.version in Room component
+      version: roomVersion // Use actual room version for proper sync
     });
   };
 
