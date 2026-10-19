@@ -12,12 +12,6 @@ Professional project overview with features, tech stack, and setup instructions.
 ### `.gitignore`
 Tells Git which files to ignore (node_modules, .env, build outputs). Prevents accidentally committing sensitive data or large dependencies.
 
-### `vercel.json`
-Deployment configuration for Vercel (frontend hosting). Specifies build command, output directory, and environment variables for production deployment.
-
-### `render.yaml`
-Deployment configuration for Render/Railway (backend hosting). Defines how to build and run the Node.js server in production.
-
 ---
 
 ## Client Folder (`client/`) - Frontend
@@ -175,12 +169,6 @@ Comprehensive technical deep-dive explaining how the entire project works - tech
 
 **"How do you find movies?"**
 → `MovieBrowser.jsx` uses TMDB API (via `tmdb.js` service) to search/browse movies and get YouTube trailer links.
-
-**"What's vercel.json for?"**
-→ Tells Vercel how to deploy the React frontend (build command, output directory, environment variables).
-
-**"What's render.yaml for?"**
-→ Tells Render/Railway how to deploy the Node.js backend (start command, environment variables, port).
 
 ---
 
